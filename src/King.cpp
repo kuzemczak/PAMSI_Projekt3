@@ -3,6 +3,8 @@
 King::King(Team team) :
 	Piece(team, "King")
 {
+	strength_ = team * 900;
+
 	for (signed char i = -1; i < 2; i++)
 		for (signed char j = -1; j < 2; j++)
 			if (i == 0 && j == 0)

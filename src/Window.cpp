@@ -4,12 +4,14 @@
 
 Window::Window()
 {
-	
+	mouseLeftPrevState_ = GLFW_RELEASE;
+	mousePrevPosition_ = glm::vec2(0.0f, 0.0f);
 }
 
 
 Window::~Window()
 {
+
 }
 
 int Window::init(int w, int h, const char * name)
@@ -159,4 +161,27 @@ glm::vec2 Window::getCursorPos()
 
 	// new version
 	return glm::vec2((float)xpos, (float)height()-ypos);
+}
+
+void Window::process_events()
+{
+	if (mouseLeftPrevState_ == GLFW_RELEASE && isMousePressed(GLFW_MOUSE_BUTTON_LEFT))
+	{
+		mousePrevPosition_ = getCursorPos();
+		Events::emit_mouse_left_pressed(mousePrevPosition_[0], mousePrevPosition_[1]);
+		mouseLeftPrevState_ = GLFW_PRESS;
+	}
+
+	if (mouseLeftPrevState_ == GLFW_PRESS && !isMousePressed(GLFW_MOUSE_BUTTON_LEFT))
+	{
+		Events::emit_mouse_left_released(mousePrevPosition_[0], mousePrevPosition_[1]);
+		mouseLeftPrevState_ = GLFW_RELEASE;
+	}
+
+	if (mouseLeftPrevState_ == GLFW_PRESS && isMousePressed(GLFW_MOUSE_BUTTON_LEFT) &&
+		glm::length(getCursorPos() - mousePrevPosition_) >= 1.0f)
+	{
+		mousePrevPosition_ = getCursorPos();
+		Events::emit_mouse_dragged(mousePrevPosition_[0], mousePrevPosition_[1]);
+	}
 }

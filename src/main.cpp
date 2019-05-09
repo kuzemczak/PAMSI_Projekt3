@@ -33,7 +33,7 @@ int main()
 	Rect::setLocationMode(CENTER);
 	DrawableObject::setAspectRatio(window->width(), window->height());
 
-	Piece p;
+	//Piece p;
 
 	std::vector<Triangles*> chess;
 

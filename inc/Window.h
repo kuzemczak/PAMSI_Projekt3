@@ -4,9 +4,16 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "Events.h"
+
 class Window
 {
 	GLFWwindow * window;
+
+	///////// mouse history variables
+	GLuint mouseLeftPrevState_;
+	glm::vec2 mousePrevPosition_;
+
 public:
 	Window();
 
@@ -35,6 +42,7 @@ public:
 
 	void close();
 	
+	void process_events();
 
 	~Window();
 };

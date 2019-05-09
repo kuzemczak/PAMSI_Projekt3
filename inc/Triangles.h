@@ -20,6 +20,11 @@ public:
 
 	void generateShaders();
 	void draw();
-	void generateTexture(unsigned char * textureData, GLuint width, GLuint height, GLuint channels);
+	void generateTexture(
+		unsigned char * textureData, 
+		GLuint width, 
+		GLuint height, 
+		GLuint channels
+	);
 };
 #endif

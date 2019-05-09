@@ -4,12 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include "Rect.h"
 
-enum Team { BLACK, WHITE };
+enum Team { BLACK = -1, WHITE = 1};
 
 class Piece
 {
@@ -19,13 +16,16 @@ protected:
 	std::string name_;
 	Rect shape_;
 	Team team_;
+	int strength_;
+	GLuint moveCntr_;
 
 public:
-	Piece(Team team, std::string name = "") : 
+	Piece(Team team, std::string name = "") :
 		shape_(1, glm::vec2(0.0f, 0.0f)),
 		name_(name),
 		boardPosition_(0, 0),
-		team_(team)
+		team_(team),
+		moveCntr_(0)
 	{}
 	~Piece() {}
 
@@ -37,6 +37,15 @@ public:
 	std::vector<glm::i8vec2> & get_moves();
 	bool contains(GLfloat xx, GLfloat yy);
 	glm::i8vec2 & get_board_position();
+	int get_strength();
+	GLuint get_move_count();
+
+	void set_shape_texture(
+		unsigned char * textureData, 
+		GLuint width, 
+		GLuint height, 
+		GLuint channels
+	);
 };
 
 class King : public Piece
