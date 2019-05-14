@@ -5,10 +5,15 @@ Queen::Queen(Team team) :
 {
 	strength_ = team * 90;
 
-	for (signed char i = -1; i < 2; i++)
-		for (signed char j = -1; j < 2; j++)
-			if (i == 0 && j == 0)
-				moves_.push_back(glm::i8vec2(8 * i, 8 * j));
+	// available moves with 'ray move' bit set
+	moves_.push_back(9 | RAY_MOVE | NEGATIVE_MOVE);
+	moves_.push_back(8 | RAY_MOVE | NEGATIVE_MOVE);
+	moves_.push_back(7 | RAY_MOVE | NEGATIVE_MOVE);
+	moves_.push_back(1 | RAY_MOVE | NEGATIVE_MOVE);
+	moves_.push_back(1 | RAY_MOVE);
+	moves_.push_back(7 | RAY_MOVE);
+	moves_.push_back(8 | RAY_MOVE);
+	moves_.push_back(9 | RAY_MOVE);
 
 	std::string s = "";
 	s.append(textureDir);
@@ -18,5 +23,37 @@ Queen::Queen(Team team) :
 		s.append("/Hetman.png");
 	load_shape_texture(s);
 
-	shape_.setLocation(glm::vec2(200.0f, 100.0f));
+	if (team == WHITE)
+	{
+		move_board(3);
+	}
+	else
+	{
+		move_board(60);
+	}
+}
+
+std::vector<int> Queen::get_moves(std::vector<Piece*> board)
+{
+	std::vector<int> ret;
+	for (int m : moves_)
+	{
+		if (has_bits_set(m, RAY_MOVE))
+		{
+			int pos = 0, change = 0;
+			if (has_bits_set(m, NEGATIVE_MOVE))
+				change = -(m & 63);
+			else
+				change = (m & 63);
+			pos = boardPosition_ + change;
+
+			// TODO: zastanowic sie jak rozwiazac problem z przechodzeniem do nowej linii podczas ray move
+			while (pos >= 0 && pos < 64)
+			{
+
+			}
+		}
+	}
+
+	return ret;
 }

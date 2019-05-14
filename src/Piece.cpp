@@ -8,11 +8,21 @@ std::string Piece::textureDir = "";
 Piece::Piece(Team team, std::string name) :
 	shape_(75, glm::vec2(0.0f, 0.0f)),
 	name_(name),
-	boardPosition_(0, 0),
+	boardPosition_(0),
 	team_(team),
 	moveCntr_(0)
 {
 	handle_events(this);
+}
+
+int Piece::gen_move(int from, int to, int specialBits)
+{
+	return (from << 0) | (to << 6) | specialBits;
+}
+
+bool Piece::has_bits_set(int move, int bits)
+{
+	return ((move & bits) == bits);
 }
 
 void Piece::move_screen(glm::vec2 boardCoords)
@@ -27,27 +37,33 @@ void Piece::move_screen(GLfloat xx, GLfloat yy)
 
 void Piece::move_board(glm::i8vec2 boardPosition)
 {
-	boardPosition_ = boardPosition;
+	boardPosition_ = boardPosition[1] * 8 + boardPosition[0];
 	moveCntr_++;
 }
 
 void Piece::move_board(GLuint xx, GLuint yy)
 {
-	boardPosition_ = glm::i8vec2(xx, yy);
+	boardPosition_ = yy * 8 + xx;
 	moveCntr_++;
 }
 
-glm::i8vec2 & Piece::get_board_position()
+void Piece::move_board(int pos)
+{
+	boardPosition_ = pos;
+	moveCntr_++;
+}
+
+int Piece::get_board_position()
 {
 	return boardPosition_;
 }
 
-std::vector<glm::i8vec2> & Piece::get_moves()
+std::vector<int> Piece::get_moves(std::vector<Piece*> board)
 {
 	return moves_;
 }
 
-bool Piece::contains(GLfloat xx, GLfloat yy)
+bool Piece::shape_contains(GLfloat xx, GLfloat yy)
 {
 	return shape_.contains(xx, yy);
 }
@@ -60,6 +76,11 @@ int Piece::get_strength()
 GLuint Piece::get_move_count()
 {
 	return moveCntr_;
+}
+
+Team Piece::get_team()
+{
+	return team_;
 }
 
 void Piece::set_shape_texture(

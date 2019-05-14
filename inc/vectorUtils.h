@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cstdint>
 #include "glm/glm.hpp"
 
 template <typename T>
