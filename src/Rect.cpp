@@ -162,8 +162,10 @@ void Rect::setLocationMode(LocMode mode)
 
 bool Rect::contains(GLfloat xx, GLfloat yy)
 {
-	if (xx >= vertices[4] && xx <= vertices[9] &&
-		yy >= vertices[5] && yy <= vertices[10])
+	if (xx >= vertices[3] + transformationMatrix[3][0] &&
+		xx <= vertices[9] + transformationMatrix[3][0] &&
+		yy >= vertices[4] + transformationMatrix[3][1] &&
+		yy <= vertices[10] + transformationMatrix[3][1])
 		return true;
 	return false;
 }

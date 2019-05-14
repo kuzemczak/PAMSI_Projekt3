@@ -62,9 +62,10 @@ void Triangles::generateShaders()
 			"in vec2 texCoord;"
 			"out vec4 color;\n"
 			"uniform sampler2D uniTexture;\n"
-			"uniform uint isTexture;"
+			"uniform uint isTexture;\n"
+			"const uint zero = 0;"
 			"void main() {\n"
-			"if (isTexture == 0) {\n"
+			"if (isTexture == zero) {\n"
 			"color = fragmentColor;\n"
 			"} else {\n"
 			"color = texture(uniTexture, texCoord);\n"
@@ -109,7 +110,7 @@ void Triangles::draw()
 		if (newColors)
 		{
 			GLuint offset = 0,
-				size = colors.size() * sizeof(colors[0]);
+				size = static_cast<GLuint>(colors.size()) * sizeof(colors[0]);
 			glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 			glBufferSubData(GL_ARRAY_BUFFER, offset, size, colors.data());
 		}
@@ -117,7 +118,7 @@ void Triangles::draw()
 		if (newTextureCoords)
 		{
 			GLuint offset = 0,
-				size = textureCoords.size() * sizeof(textureCoords[0]);
+				size = static_cast<GLuint>(textureCoords.size()) * sizeof(textureCoords[0]);
 			glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
 			glBufferSubData(GL_ARRAY_BUFFER, offset, size, textureCoords.data());
 		}
@@ -160,7 +161,7 @@ void Triangles::draw()
 		);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
-		glDrawArrays(drawingMode, 0, vertices.size() / 3);
+		glDrawArrays(drawingMode, 0, static_cast<GLuint>(vertices.size()) / 3);
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);

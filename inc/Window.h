@@ -6,7 +6,7 @@
 
 #include "Events.h"
 
-class Window
+class Window : public Events
 {
 	GLFWwindow * window;
 

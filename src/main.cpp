@@ -1,7 +1,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include "Window.h"
@@ -31,7 +30,10 @@ int main()
 	window->enableKeyboard();
 	window->setBgcolor(0, 0, 0.4f, 0);
 	Rect::setLocationMode(CENTER);
-	DrawableObject::setAspectRatio(window->width(), window->height());
+	DrawableObject::setAspectRatio(
+		static_cast<GLuint>(window->width()),
+		static_cast<GLuint>(window->height())
+	);
 
 	//Piece p;
 
@@ -87,13 +89,26 @@ int main()
 	chessBoard.generateTexture(data, width, height, nrChannels);
 	stbi_image_free(data);
 
+	Piece::set_texture_dir("data/");
+
+	std::vector<Piece*> pieces;
+	pieces.push_back(new King(WHITE));
+	pieces.push_back(new Queen(WHITE));
+
 	do {
 		window->clear();
+		window->process_events();
 		chessBoard.draw();
 		for (Triangles * t : chess)
 		{
 			t->draw();
 		}
+
+		for (Piece * p : pieces)
+		{
+			p->draw();
+		}
+
 
 		window->swapBuffers();
 	} while (!(window->isPressed(GLFW_KEY_ESCAPE)) && !(window->shouldClose()));

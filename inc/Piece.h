@@ -5,12 +5,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Rect.h"
+#include "Events.h"
 
 enum Team { BLACK = -1, WHITE = 1};
 
-class Piece
+class Piece : Events
 {
 protected:
+	static std::string textureDir;
+
 	std::vector<glm::i8vec2> moves_;
 	glm::i8vec2 boardPosition_;
 	std::string name_;
@@ -19,20 +22,17 @@ protected:
 	int strength_;
 	GLuint moveCntr_;
 
+
 public:
-	Piece(Team team, std::string name = "") :
-		shape_(1, glm::vec2(0.0f, 0.0f)),
-		name_(name),
-		boardPosition_(0, 0),
-		team_(team),
-		moveCntr_(0)
-	{}
+	Piece(Team team, std::string name = "");
 	~Piece() {}
+
+	static void set_texture_dir(const std::string & name);
 
 	void move_screen(glm::vec2 screenPosition);
 	void move_screen(GLfloat xx, GLfloat yy);
-	void move_board(glm::i8vec2 boardPosition);
-	void move_board(GLuint xx, GLuint yy);
+	virtual void move_board(glm::i8vec2 boardPosition);
+	virtual void move_board(GLuint xx, GLuint yy);
 
 	std::vector<glm::i8vec2> & get_moves();
 	bool contains(GLfloat xx, GLfloat yy);
@@ -46,6 +46,14 @@ public:
 		GLuint height, 
 		GLuint channels
 	);
+
+	void load_shape_texture(const std::string & path);
+	
+	void draw();
+
+
+	///////////////////////// Events
+	void mouse_dragged(GLfloat xx, GLfloat yy);
 };
 
 class King : public Piece
@@ -53,6 +61,15 @@ class King : public Piece
 public:
 	King(Team team);
 	~King() {}
+
+	void move_board(glm::i8vec2 boardPosition);
+	void move_board(GLuint xx, GLuint yy);
 };
 
+class Queen : public Piece
+{
+public:
+	Queen(Team team);
+	~Queen() {}
+};
 #endif 

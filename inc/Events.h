@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include "vectorUtils.h"
+
 class Events
 {
 	static std::vector<Events*> objects;
