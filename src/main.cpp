@@ -9,6 +9,7 @@
 #include "Text.h"
 #include "Rect.h"
 #include "Piece.h"
+#include "ChessBoard.h"
 
 Window * window;
 
@@ -35,80 +36,14 @@ int main()
 		static_cast<GLuint>(window->height())
 	);
 
-	//Piece p;
-
-	std::vector<Triangles*> chess;
-
-	Rect pion(75, vec2(400.0f, 300.0f)),
-		wieza(75, vec2(110.0f, 110.0f)),
-		hetman(75, vec2(220.0f, 110.0f)),
-		goniec(75, vec2(330.0f, 110.0f)),
-		skoczek(75, vec2(440.0f, 110.0f)),
-		krol(75, vec2(550.0f, 110.0f)),
-		chessBoard(600, vec2(300.0f, 300.0f));
-
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char *data = stbi_load("data/Pion.png", &width, &height, &nrChannels, 0);
-	pion.generateTexture(data, width, height, nrChannels);
-	stbi_image_free(data);
-	chess.push_back(&pion);
-
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("data/Wieza.png", &width, &height, &nrChannels, 0);
-	wieza.generateTexture(data, width, height, nrChannels);
-	stbi_image_free(data);
-	chess.push_back(&wieza);
-
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("data/Hetman.png", &width, &height, &nrChannels, 0);
-	hetman.generateTexture(data, width, height, nrChannels);
-	stbi_image_free(data);
-	chess.push_back(&hetman);
-
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("data/Goniec.png", &width, &height, &nrChannels, 0);
-	goniec.generateTexture(data, width, height, nrChannels);
-	stbi_image_free(data);
-	chess.push_back(&goniec);
-
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("data/Skoczek.png", &width, &height, &nrChannels, 0);
-	skoczek.generateTexture(data, width, height, nrChannels);
-	stbi_image_free(data);
-	chess.push_back(&skoczek);
-
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("data/Krol.png", &width, &height, &nrChannels, 0);
-	krol.generateTexture(data, width, height, nrChannels);
-	stbi_image_free(data);
-	chess.push_back(&krol);
-
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("data/chessBoard.png", &width, &height, &nrChannels, 0);
-	chessBoard.generateTexture(data, width, height, nrChannels);
-	stbi_image_free(data);
-
-	Piece::set_texture_dir("data/");
-
-	std::vector<Piece*> pieces;
-	pieces.push_back(new King(WHITE));
-	pieces.push_back(new Queen(WHITE));
+	
+	ChessBoard board(window->width(), window->height());
 
 	do {
 		window->clear();
 		window->process_events();
-		chessBoard.draw();
-		for (Triangles * t : chess)
-		{
-			t->draw();
-		}
 
-		for (Piece * p : pieces)
-		{
-			p->draw();
-		}
-
+		board.draw();
 
 		window->swapBuffers();
 	} while (!(window->isPressed(GLFW_KEY_ESCAPE)) && !(window->shouldClose()));

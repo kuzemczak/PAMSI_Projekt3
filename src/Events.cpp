@@ -7,6 +7,11 @@ void Events::handle_events(Events * itself)
 	objects.push_back(itself);
 }
 
+void Events::unhandle_events(Events * itself)
+{
+	objects.erase(std::find(objects.begin(), objects.end(), itself));
+}
+
 void Events::mouse_left_pressed(GLfloat xx, GLfloat yy)
 {
 	

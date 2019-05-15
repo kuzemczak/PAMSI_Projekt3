@@ -12,17 +12,16 @@ Piece::Piece(Team team, std::string name) :
 	team_(team),
 	moveCntr_(0)
 {
-	handle_events(this);
+}
+
+void Piece::set_init_position(int pos)
+{
+	boardPosition_ = pos;
 }
 
 int Piece::gen_move(int from, int to, int specialBits)
 {
 	return (from << 0) | (to << 6) | specialBits;
-}
-
-bool Piece::has_bits_set(int move, int bits)
-{
-	return ((move & bits) == bits);
 }
 
 void Piece::move_screen(glm::vec2 boardCoords)
@@ -58,7 +57,7 @@ int Piece::get_board_position()
 	return boardPosition_;
 }
 
-std::vector<int> Piece::get_moves(std::vector<Piece*> board)
+std::vector<int> Piece::get_moves(const std::vector<Piece*> & board, const std::vector<int> & moveHistory)
 {
 	return moves_;
 }
@@ -81,6 +80,11 @@ GLuint Piece::get_move_count()
 Team Piece::get_team()
 {
 	return team_;
+}
+
+std::string Piece::get_name()
+{
+	return name_;
 }
 
 void Piece::set_shape_texture(
@@ -113,10 +117,10 @@ void Piece::draw()
 	shape_.draw();
 }
 //////////////////////////////////// Events
-void Piece::mouse_dragged(GLfloat xx, GLfloat yy)
-{
-	if (shape_.contains(xx, yy))
-	{
-		shape_.setLocation(glm::vec2(xx, yy));
-	}
-}
+//void Piece::mouse_dragged(GLfloat xx, GLfloat yy)
+//{
+//	if (shape_.contains(xx, yy))
+//	{
+//		shape_.setLocation(glm::vec2(xx, yy));
+//	}
+//}

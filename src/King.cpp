@@ -5,33 +5,36 @@ King::King(Team team) :
 {
 	strength_ = team * 900;
 
-	moves_.push_back(9 | NEGATIVE_MOVE);
-	moves_.push_back(8 | NEGATIVE_MOVE);
-	moves_.push_back(7 | NEGATIVE_MOVE);
-	moves_.push_back(1 | NEGATIVE_MOVE);
-	moves_.push_back(1);
-	moves_.push_back(7);
-	moves_.push_back(8);
-	moves_.push_back(9);
-	moves_.push_back(2 | QUEEN_CASTLE | NEGATIVE_MOVE);
-	moves_.push_back(2 | KING_CASTLE);
-
+	moves_.push_back(gen_move(0, 9, NEGATIVE_MOVE));
+	moves_.push_back(gen_move(0, 8, NEGATIVE_MOVE));
+	moves_.push_back(gen_move(0, 7, NEGATIVE_MOVE));
+	moves_.push_back(gen_move(0, 1, NEGATIVE_MOVE));
+	moves_.push_back(gen_move(0, 1, 0));
+	moves_.push_back(gen_move(0, 7, 0));
+	moves_.push_back(gen_move(0, 8, 0));
+	moves_.push_back(gen_move(0, 9, 0));
+	
 	std::string s = "";
 	s.append(textureDir);
-	if (*(s.end() - 1) == '/')
-		s.append("Krol.png");
-	else
-		s.append("/Krol.png");
-	load_shape_texture(s);
-
+	if (*(s.end() - 1) != '/')
+		s.append("/");
+	s.append("Krol");
 	if (team == WHITE)
 	{
-		move_board(4);
+		set_init_position(4);
+		moves_.push_back(gen_move(0, 2, QUEEN_CASTLE | NEGATIVE_MOVE));
+		moves_.push_back(gen_move(0, 2, KING_CASTLE));
+		s.append("_bialy");
 	}
 	else
 	{
-		move_board(59);
+		set_init_position(59);
+		moves_.push_back(gen_move(0, 2, QUEEN_CASTLE));
+		moves_.push_back(gen_move(0, 2, KING_CASTLE | NEGATIVE_MOVE));
 	}
+
+	s.append(".png");
+	load_shape_texture(s);
 }
 
 void King::move_board(glm::i8vec2 boardPosition)
@@ -64,35 +67,43 @@ void King::move_board(int pos)
 	Piece::move_board(pos);
 }
 
-std::vector<int> King::get_moves(std::vector<Piece*> board)
+std::vector<int> King::get_moves(const std::vector<Piece*> & board, const std::vector<int> & moveHistory)
 {
 	std::vector<int> ret;
 
 	for (int m : moves_)
 	{
 		int pos = 0;
-		if (m & NEGATIVE_MOVE == NEGATIVE_MOVE)
-			pos = - (m & 63) + boardPosition_;
+		if (has_bits_set(m, NEGATIVE_MOVE))
+			pos = - GET_TO(m) + boardPosition_;
 		else
-			pos = (m & 63) + boardPosition_;
+			pos = GET_TO(m) + boardPosition_;
 
 		if (moveCntr_ == 0 &&
-			((m & QUEEN_CASTLE) == QUEEN_CASTLE) &&
-			board[boardPosition_ - 4]->get_move_count() == 0)
+				has_bits_set(m, QUEEN_CASTLE))
 		{
-			ret.push_back(gen_move(boardPosition_, pos, QUEEN_CASTLE));
+			if (board[boardPosition_ - team_ * 4] != NULL &&
+					board[boardPosition_ - team_ * 4]->get_move_count() == 0 &&
+					board[boardPosition_ - team_ * 3] == NULL &&
+					board[boardPosition_ - team_ * 2] == NULL &&
+					board[boardPosition_ - team_ * 1] == NULL)
+			{
+				ret.push_back(gen_move(boardPosition_, pos, QUEEN_CASTLE));
+			}
 		}
-		else if (moveCntr_ == 0 && 
-			((m & KING_CASTLE) == KING_CASTLE) &&
-			board[boardPosition_ + 3]->get_move_count() == 0)
+		else if (	moveCntr_ == 0 && 
+							has_bits_set(m, KING_CASTLE) &&
+							board[boardPosition_ + team_ * 3] != NULL &&
+							board[boardPosition_ + team_ * 3]->get_move_count() == 0 &&
+							board[boardPosition_ + team_ * 2] == NULL && 
+							board[boardPosition_ + team_ * 1] == NULL)
 		{
 			ret.push_back(gen_move(boardPosition_, pos, KING_CASTLE));
 		}
-		else if (pos >= 0 &&
-			pos < 64)
+		else if (pos >= 0 && pos < 64)
 		{
 			if (board[pos] == NULL)
-				ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
+					ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
 			else
 			{
 				if (board[pos]->get_team() != team_)
@@ -100,5 +111,6 @@ std::vector<int> King::get_moves(std::vector<Piece*> board)
 			}
 		}
 	}
+
 	return ret;
 }

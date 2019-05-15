@@ -12,6 +12,7 @@ class Events
 	static std::vector<Events*> objects;
 public:
 	void handle_events(Events * itself);
+	void unhandle_events(Events * itself);
 
 	////////////////////////////// AVAILABLE EVENTS
 	virtual void mouse_left_pressed(GLfloat xx, GLfloat yy);

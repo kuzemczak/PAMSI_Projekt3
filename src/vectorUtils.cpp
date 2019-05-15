@@ -53,3 +53,8 @@ std::ostream& operator<< (std::ostream& out, const glm::vec4 & v)
 		<< "]";
 	return out;
 }
+
+bool has_bits_set(int integer, int bits)
+{
+	return ((integer & bits) == bits);
+}
