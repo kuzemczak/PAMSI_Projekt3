@@ -6,6 +6,7 @@
 #include "vectorUtils.h"
 #include "Piece.h"
 #include "Events.h"
+#include "ChessAI.h"
 
 class ChessBoard : Events
 {
@@ -25,11 +26,15 @@ class ChessBoard : Events
 		boardPixHeight_;
 
 	Rect chessBoard;
-
+	
 	Team currentTeam_;
+
+	bool ai_turn;
 
 public:
 	ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight);
+
+	void execute();
 
 	void update_board_positions();
 	void update_screen_positions();

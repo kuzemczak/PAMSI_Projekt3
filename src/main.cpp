@@ -43,6 +43,7 @@ int main()
 		window->clear();
 		window->process_events();
 
+		board.execute();
 		board.draw();
 
 		window->swapBuffers();

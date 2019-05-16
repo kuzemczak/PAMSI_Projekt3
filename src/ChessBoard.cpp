@@ -59,6 +59,19 @@ ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight) :
 	stbi_image_free(data);
 
 	currentTeam_ = WHITE;
+
+	ai_turn = false;
+}
+
+void ChessBoard::execute()
+{
+	if (ai_turn)
+	{
+		int move = ChessAI::get_next_move(BLACK, board_, moveHistory_);
+		selectedPiece_ = board_[GET_FROM(move)];
+		manage_move(move);
+		ai_turn = false;
+	}
 }
 
 void ChessBoard::update_board_positions()
@@ -122,7 +135,10 @@ void ChessBoard::draw()
 void ChessBoard::change_team()
 {
 	if (currentTeam_ == WHITE)
+	{
 		currentTeam_ = BLACK;
+		ai_turn = true;
+	}
 	else
 		currentTeam_ = WHITE;
 }
@@ -133,7 +149,8 @@ void ChessBoard::manage_move(int move)
 	{
 		do_capture(move);
 	}
-	else if (has_bits_set(move, KING_CASTLE))
+	else if (has_bits_set(move, KING_CASTLE) ||
+		has_bits_set(move, QUEEN_CASTLE))
 	{
 		do_castle(move);
 	}
@@ -149,6 +166,8 @@ void ChessBoard::manage_move(int move)
 	change_team();
 
 	moveHistory_.push_back(move);
+
+	selectedPiece_ = NULL;
 }
 
 void ChessBoard::do_capture(int move)
@@ -171,11 +190,11 @@ void ChessBoard::do_castle(int move)
 {
 	if (has_bits_set(move, QUEEN_CASTLE))
 	{
-		board_[GET_TO(move) - selectedPiece_->get_team() * 2]->move_board(GET_TO(move) + 1);
+		board_[GET_TO(move) - selectedPiece_->get_team() * 2]->move_board(GET_TO(move) + selectedPiece_->get_team());
 	}
 	else
 	{
-		board_[GET_TO(move) + selectedPiece_->get_team() * 1]->move_board(GET_TO(move) - 1);
+		board_[GET_TO(move) + selectedPiece_->get_team() * 1]->move_board(GET_TO(move) - selectedPiece_->get_team());
 	}
 }
 
@@ -264,6 +283,5 @@ void ChessBoard::mouse_left_pressed(GLfloat xx, GLfloat yy)
 
 		possibleMoves_.clear();
 		update_move_marks();
-		selectedPiece_ = NULL;
 	}
 }
