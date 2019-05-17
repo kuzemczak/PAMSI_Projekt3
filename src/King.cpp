@@ -37,36 +37,6 @@ King::King(Team team) :
 	load_shape_texture(s);
 }
 
-void King::move_board(glm::i8vec2 boardPosition)
-{
-	if (moveCntr_ == 0)
-	{
-		moves_.pop_back();
-		moves_.pop_back();
-	}
-	Piece::move_board(boardPosition);
-}
-
-void King::move_board(GLuint xx, GLuint yy)
-{
-	if (moveCntr_ == 0)
-	{
-		moves_.pop_back();
-		moves_.pop_back();
-	}
-	Piece::move_board(xx, yy);
-}
-
-void King::move_board(int pos)
-{
-	if (moveCntr_ == 0)
-	{
-		moves_.pop_back();
-		moves_.pop_back();
-	}
-	Piece::move_board(pos);
-}
-
 std::vector<int> King::get_moves(const std::vector<Piece*> & board, const std::vector<int> & moveHistory)
 {
 	std::vector<int> ret;
@@ -79,10 +49,12 @@ std::vector<int> King::get_moves(const std::vector<Piece*> & board, const std::v
 		else
 			pos = GET_TO(m) + boardPosition_;
 
-		if (moveCntr_ == 0 &&
-				has_bits_set(m, QUEEN_CASTLE))
+		int prevPos = boardPosition_;
+
+		if (has_bits_set(m, QUEEN_CASTLE))
 		{
-			if (board[boardPosition_ - team_ * 4] != NULL &&
+			if (moveCntr_ == 0 &&
+					board[boardPosition_ - team_ * 4] != NULL &&
 					board[boardPosition_ - team_ * 4]->get_move_count() == 0 &&
 					board[boardPosition_ - team_ * 3] == NULL &&
 					board[boardPosition_ - team_ * 2] == NULL &&
@@ -91,16 +63,20 @@ std::vector<int> King::get_moves(const std::vector<Piece*> & board, const std::v
 				ret.push_back(gen_move(boardPosition_, pos, QUEEN_CASTLE));
 			}
 		}
-		else if (	moveCntr_ == 0 && 
-							has_bits_set(m, KING_CASTLE) &&
-							board[boardPosition_ + team_ * 3] != NULL &&
-							board[boardPosition_ + team_ * 3]->get_move_count() == 0 &&
-							board[boardPosition_ + team_ * 2] == NULL && 
-							board[boardPosition_ + team_ * 1] == NULL)
+		else if (	has_bits_set(m, KING_CASTLE))
 		{
-			ret.push_back(gen_move(boardPosition_, pos, KING_CASTLE));
+			if (moveCntr_ == 0 &&
+				board[boardPosition_ + team_ * 3] != NULL &&
+				board[boardPosition_ + team_ * 3]->get_move_count() == 0 &&
+				board[boardPosition_ + team_ * 2] == NULL &&
+				board[boardPosition_ + team_ * 1] == NULL)
+			{
+				ret.push_back(gen_move(boardPosition_, pos, KING_CASTLE));
+			}
 		}
-		else if (pos >= 0 && pos < 64)
+		else if (pos >= 0 && pos < 64 &&
+			!((prevPos % 8) == 0 && (pos % 8) == 7) &&
+			!((prevPos % 8) == 7 && (pos % 8) == 0))
 		{
 			if (board[pos] == NULL)
 					ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));

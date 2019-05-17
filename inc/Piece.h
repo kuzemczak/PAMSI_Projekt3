@@ -1,30 +1,27 @@
 /* Move encryption:
-** (0 to 64) | (0 to 63) << 6 | (0 to 16 w/o 6 & 7) << 12
-** `---v---'   `------v------'  `-----------v------------'
-**   from            to                 special
+** (0 to 64) | (0 to 63) << 6 | (0 to 31) << 12 | (powers of 2) << 17
+** `---v---'   `------v------'  `-------v------'  `---------v--------'
+**   from            to              captured            special
 **/
-#define GET_FROM(i) ((i) & 63)			// decodes destination part of encoded move
-#define GET_TO(i) (((i) >> 6) & 63)	// decodes origin part of encoded move
+#define GET_FROM(i) ((i) & 63)							// decodes destination part of encoded move
+#define GET_TO(i) (((i) >> 6) & 63)					// decodes origin part of encoded move
+#define GET_CAPTURED(i) (((i) >> 12) & 31)	// decodes a number of captured piece part of encoded move
+#define MAKE_CAPTURED(i) ((i) << 12)				// encodes a number of captured piece part of a move
+#define ENCODE(from,to,capt,spec) ((from) | ((to) << 6) | ((capt) << 12) | (spec))	// encodes given values in an integer
 // Special bits:
-#define QUIET_MOVE (0 << 12)						// quiet move
-#define KING_CASTLE (1 << 12)						// king castle
-#define QUEEN_CASTLE (2 << 12)					// queen castle
-#define CAPTURE (4 << 12)								// capture
-#define EP_CAPTURE (8 << 12)						// ep-capture
-#define N_PROMO (16 << 12)							// knight-promotion
-#define B_PROMO (32 << 12)							// bishop-promotion
-#define R_PROMO (64 << 12)							// rook-promotion
-#define Q_PROMO (128 << 12)							// queen-promotion
-#define N_PROMO_CAPTURE (256 << 12)			// knight-promo capture
-#define B_PROMO_CAPTURE (512 << 12)			// bishop-promo capture
-#define R_PROMO_CAPTURE (1024 << 12)		// rook-promo capture
-#define Q_PROMO_CAPTURE (2048 << 12)		// queen-promo capture
-#define RAY_MOVE (4096 << 12)						// ray move
-#define NEGATIVE_MOVE (8192 << 12)			// negative (opposite direction)
-#define PAWN_CAPTURE (16384 << 12)			// diagonal move of a Pawn
-#define PAWN_PUSH (32768 << 12)					// straight move of a Pawn
-#define DOUBLE_PAWN_PUSH (65536 << 12)	// double pawn push
-#define PROMOTION (131072 << 12)				// general Pawn promotion
+#define QUIET_MOVE (0 << 17)						// quiet move
+#define KING_CASTLE (1 << 17)						// king castle
+#define QUEEN_CASTLE (2 << 17)					// queen castle
+#define CAPTURE (4 << 17)								// capture
+#define EP_CAPTURE (8 << 17)						// ep-capture
+#define N_PROMO (16 << 17)							// knight-promotion
+#define B_PROMO (32 << 17)							// bishop-promotion
+#define R_PROMO (64 << 17)							// rook-promotion
+#define Q_PROMO (128 << 17)							// queen-promotion
+#define RAY_MOVE (256 << 17)						// ray move
+#define NEGATIVE_MOVE (512 << 17)				// negative (opposite direction)
+#define PROMOTION (1024 << 17)					// general Pawn promotion
+#define DOUBLE_PAWN_PUSH  (2048 << 17)	// double pawn push
 
 
 
@@ -51,6 +48,7 @@ protected:
 	Team team_;
 	int strength_;
 	GLuint moveCntr_;
+	bool captured_;
 
 	int gen_move(int from, int to, int specialBits);
 	
@@ -64,10 +62,13 @@ public:
 
 	void move_screen(glm::vec2 screenPosition);
 	void move_screen(GLfloat xx, GLfloat yy);
-	virtual void move_board(glm::i8vec2 boardPosition);
-	virtual void move_board(GLuint xx, GLuint yy);
-	virtual void move_board(int pos);
+	void move_board(glm::i8vec2 boardPosition);
+	void move_board(GLuint xx, GLuint yy);
+	void move_board(int pos);
+	void undo_move(int pos);
+	void set_captured(bool captured);
 
+	bool is_captured();
 	virtual std::vector<int>  get_moves(
 		const std::vector<Piece*> & board, 
 		const std::vector<int> & moveHistory);
@@ -99,10 +100,6 @@ class King : public Piece
 public:
 	King(Team team);
 	~King() {}
-
-	void move_board(glm::i8vec2 boardPosition);
-	void move_board(GLuint xx, GLuint yy);
-	void move_board(int pos);
 
 	std::vector<int> get_moves(const std::vector<Piece*> & board, const std::vector<int> & moveHistory);
 };

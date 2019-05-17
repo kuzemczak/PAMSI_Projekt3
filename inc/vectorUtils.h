@@ -18,6 +18,26 @@ std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
 	return out;
 }
 
+template < typename T>
+int find_i(const std::vector<T>  & vecOfElements, const T  & element)
+{
+	int ret;
+
+	// Find given element in vector
+	auto it = std::find(vecOfElements.begin(), vecOfElements.end(), element);
+
+	if (it != vecOfElements.end())
+	{
+		ret = distance(vecOfElements.begin(), it);
+	}
+	else
+	{
+		ret = -1;
+	}
+
+	return ret;
+}
+
 std::ostream& operator<< (std::ostream& out, const glm::mat3 & v);
 std::ostream& operator<< (std::ostream& out, const glm::mat4 & v);
 std::ostream& operator<< (std::ostream& out, const glm::vec2 & v);

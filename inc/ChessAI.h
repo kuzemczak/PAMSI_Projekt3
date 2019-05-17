@@ -2,12 +2,10 @@
 #define CHESSAI_H
 
 #include "Piece.h"
+#include "ChessBoard.h"
 
-class ChessAI
-{
-public:
-	static int get_next_move(Team team, const std::vector<Piece*> & board, const std::vector<int> & moveHistory);
-};
+int get_next_move(ChessBoard & board, Team team, int depth);
+int minimax(ChessBoard & board, Team team, int depth);
+
 
 #endif // !CHESSAI_H
-

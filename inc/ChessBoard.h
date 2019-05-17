@@ -6,7 +6,6 @@
 #include "vectorUtils.h"
 #include "Piece.h"
 #include "Events.h"
-#include "ChessAI.h"
 
 class ChessBoard : Events
 {
@@ -14,7 +13,7 @@ class ChessBoard : Events
 	std::vector<Piece*> white_;
 	std::vector<Piece*> black_;
 	std::vector<Piece*> pieces_;
-	Piece * selectedPiece_;
+	Piece * movingPiece_;
 
 	std::vector<Rect*> possibleMoveMarks_;
 	std::vector<int> possibleMoves_;
@@ -29,12 +28,19 @@ class ChessBoard : Events
 	
 	Team currentTeam_;
 
-	bool ai_turn;
+	bool aiTurn_;
+
+	int whiteTotalStrength_,
+		blackTotalStrength_,
+		strengthBalance_;
 
 public:
 	ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight);
+	ChessBoard(const ChessBoard & c);
 
 	void execute();
+	bool is_ai_turn();
+	void set_ai_turn(bool val);
 
 	void update_board_positions();
 	void update_screen_positions();
@@ -42,10 +48,14 @@ public:
 	void draw();
 
 	void change_team();
-	void manage_move(int move);
-	void do_capture(int move);
+	void do_move(int move, bool noDisplay = false);
+	int do_capture(int move);
 	void do_castle(int move);
-	void do_ep_capture(int move);
+	int do_ep_capture(int  move);
+	void undo_moves(int number, bool noDisplay = false);
+
+	std::vector<int> get_possible_moves(Team team);
+	int get_strength_balance();
 
 	void board_pos_to_pix(int boardPos, GLfloat & xx, GLfloat & yy);
 	int closest_square(GLfloat xx, GLfloat yy);

@@ -10,7 +10,8 @@ Piece::Piece(Team team, std::string name) :
 	name_(name),
 	boardPosition_(0),
 	team_(team),
-	moveCntr_(0)
+	moveCntr_(0),
+	captured_(false)
 {
 }
 
@@ -50,6 +51,22 @@ void Piece::move_board(int pos)
 {
 	boardPosition_ = pos;
 	moveCntr_++;
+}
+
+void Piece::undo_move(int pos)
+{
+	boardPosition_ = pos;
+	moveCntr_--;
+}
+
+void Piece::set_captured(bool captured)
+{
+	captured_ = captured;
+}
+
+bool Piece::is_captured()
+{
+	return captured_;
 }
 
 int Piece::get_board_position()

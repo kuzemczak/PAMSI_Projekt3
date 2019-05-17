@@ -10,6 +10,7 @@
 #include "Rect.h"
 #include "Piece.h"
 #include "ChessBoard.h"
+#include "ChessAI.h"
 
 Window * window;
 
@@ -36,14 +37,17 @@ int main()
 		static_cast<GLuint>(window->height())
 	);
 
-	
 	ChessBoard board(window->width(), window->height());
 
 	do {
 		window->clear();
 		window->process_events();
 
-		board.execute();
+		if (board.is_ai_turn())
+		{
+			get_next_move(board, BLACK, 3);
+			board.set_ai_turn(false);
+		}
 		board.draw();
 
 		window->swapBuffers();
