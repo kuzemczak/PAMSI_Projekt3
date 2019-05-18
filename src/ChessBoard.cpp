@@ -69,69 +69,6 @@ ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight) :
 	stbi_image_free(data);
 
 	currentTeam_ = WHITE;
-
-	aiTurn_ = false;
-}
-
-ChessBoard::ChessBoard(const ChessBoard & c) :
-	boardPixHeight_(c.boardPixHeight_),
-	boardPixWidth_(c.boardPixWidth_),
-	chessBoard(c.boardPixWidth_, c.boardPixHeight_, c.boardPixHeight_ / 2, c.boardPixWidth_ / 2, 0.0f)
-{
-	handle_events(this);
-
-	for (int i = 0; i < 64; i++)
-	{
-		board_.push_back(NULL);
-	}
-
-	Rect::setLocationMode(CENTER);
-	Piece::set_texture_dir("data/");
-
-	white_.push_back(new King(WHITE));
-	white_.push_back(new Queen(WHITE));
-	white_.push_back(new Rook(WHITE, 0));
-	white_.push_back(new Rook(WHITE, 7));
-	white_.push_back(new Bishop(WHITE, 2));
-	white_.push_back(new Bishop(WHITE, 5));
-	white_.push_back(new Knight(WHITE, 1));
-	white_.push_back(new Knight(WHITE, 6));
-	for (int i = 0; i < 8; i++)
-		white_.push_back(new Pawn(WHITE, 8 + i));
-
-	black_.push_back(new King(BLACK));
-	black_.push_back(new Queen(BLACK));
-	black_.push_back(new Rook(BLACK, 63));
-	black_.push_back(new Rook(BLACK, 56));
-	black_.push_back(new Bishop(BLACK, 58));
-	black_.push_back(new Bishop(BLACK, 61));
-	black_.push_back(new Knight(BLACK, 57));
-	black_.push_back(new Knight(BLACK, 62));
-	for (int i = 0; i < 8; i++)
-		black_.push_back(new Pawn(BLACK, 48 + i));
-
-	for (Piece* p : white_)
-		pieces_.push_back(p);
-
-	for (Piece* p : black_)
-		pieces_.push_back(p);
-
-	update_board_positions();
-	update_screen_positions();
-
-	movingPiece_ = NULL;
-
-	displayMoveMarks_ = false;
-
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char *data = stbi_load("data/chessBoard.png", &width, &height, &nrChannels, 0);
-	chessBoard.generateTexture(data, width, height, nrChannels);
-	stbi_image_free(data);
-
-	currentTeam_ = WHITE;
-
-	aiTurn_ = false;
 }
 
 void ChessBoard::execute()
@@ -142,16 +79,6 @@ void ChessBoard::execute()
 		do_move(move);
 		aiTurn_ = false;
 	}*/
-}
-
-bool ChessBoard::is_ai_turn()
-{
-	return aiTurn_;
-}
-
-void ChessBoard::set_ai_turn(bool val)
-{
-	aiTurn_ = val;
 }
 
 void ChessBoard::update_board_positions()
@@ -224,10 +151,14 @@ void ChessBoard::change_team()
 	if (currentTeam_ == WHITE)
 	{
 		currentTeam_ = BLACK;
-		aiTurn_ = true;
 	}
 	else
 		currentTeam_ = WHITE;
+}
+
+Team ChessBoard::current_team()
+{
+	return currentTeam_;
 }
 
 void ChessBoard::do_move(int move, bool noDisplay)

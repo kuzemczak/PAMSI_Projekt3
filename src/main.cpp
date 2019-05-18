@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -15,6 +17,8 @@
 Window * window;
 
 using namespace glm;
+
+typedef std::chrono::high_resolution_clock Clock;
 
 int main()
 {
@@ -40,14 +44,19 @@ int main()
 	ChessBoard board(window->width(), window->height());
 
 	do {
+		if (board.current_team() == BLACK)
+		{
+			auto t0 = Clock::now();
+			get_next_move(board, BLACK, 3);
+			auto t1 = Clock::now();
+			std::cout << "time: " 
+				<< static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count())
+				<< std::endl;
+		}
+
 		window->clear();
 		window->process_events();
 
-		if (board.is_ai_turn())
-		{
-			get_next_move(board, BLACK, 3);
-			board.set_ai_turn(false);
-		}
 		board.draw();
 
 		window->swapBuffers();

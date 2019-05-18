@@ -28,19 +28,14 @@ class ChessBoard : Events
 	
 	Team currentTeam_;
 
-	bool aiTurn_;
-
 	int whiteTotalStrength_,
 		blackTotalStrength_,
 		strengthBalance_;
 
 public:
 	ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight);
-	ChessBoard(const ChessBoard & c);
 
 	void execute();
-	bool is_ai_turn();
-	void set_ai_turn(bool val);
 
 	void update_board_positions();
 	void update_screen_positions();
@@ -48,6 +43,7 @@ public:
 	void draw();
 
 	void change_team();
+	Team current_team();
 	void do_move(int move, bool noDisplay = false);
 	int do_capture(int move);
 	void do_castle(int move);
