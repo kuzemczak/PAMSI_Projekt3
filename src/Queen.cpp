@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 Queen::Queen(Team team) :
-	Piece(team, "Queen")
+	Piece(QUEEN, team, "Queen")
 {
 	strength_ = team * 90;
 
@@ -59,8 +59,7 @@ std::vector<int> Queen::get_moves(const std::vector<Piece*> & board, const std::
 				ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
 			else
 			{
-				if (board[pos]->get_team() != team_)
-					ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
+				ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
 				break;
 			}
 			if (!has_bits_set(m, RAY_MOVE))

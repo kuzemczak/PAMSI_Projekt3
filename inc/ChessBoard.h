@@ -50,11 +50,14 @@ public:
 	int do_ep_capture(int  move);
 	void undo_moves(int number, bool noDisplay = false);
 
-	std::vector<int> get_possible_moves(Team team);
+	std::vector<int> get_possible_moves(Team team, bool verifyCaptures = true, bool checkSafety = false);
 	int get_strength_balance();
 
 	void board_pos_to_pix(int boardPos, GLfloat & xx, GLfloat & yy);
 	int closest_square(GLfloat xx, GLfloat yy);
+	bool is_square_safe(int square, Team teamCheckingSafety, const std::vector<int> & opponentMoves);
+	void verify_king_moves_safety(int kingPos, Team kingTeam, std::vector<int> & moves);
+	void verify_piece_captures(Team pawnTeam, std::vector<int> & moves);
 
 	void print_board();
 

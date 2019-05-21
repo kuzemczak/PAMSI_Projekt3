@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 King::King(Team team) :
-	Piece(team, "King")
+	Piece(KING, team, "King")
 {
 	strength_ = team * 900;
 
@@ -82,8 +82,7 @@ std::vector<int> King::get_moves(const std::vector<Piece*> & board, const std::v
 					ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
 			else
 			{
-				if (board[pos]->get_team() != team_)
-					ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
+				ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
 			}
 		}
 	}

@@ -3,13 +3,21 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+Team other_team(Team team)
+{
+	if (team == WHITE)
+		return BLACK;
+	return WHITE;
+}
+
 std::string Piece::textureDir = "";
 
-Piece::Piece(Team team, std::string name) :
+Piece::Piece(PieceType type, Team team, std::string name) :
 	shape_(75, glm::vec2(0.0f, 0.0f)),
 	name_(name),
 	boardPosition_(0),
 	team_(team),
+	type_(type),
 	moveCntr_(0),
 	captured_(false)
 {
@@ -97,6 +105,11 @@ GLuint Piece::get_move_count()
 Team Piece::get_team()
 {
 	return team_;
+}
+
+PieceType Piece::get_type()
+{
+	return type_;
 }
 
 std::string Piece::get_name()

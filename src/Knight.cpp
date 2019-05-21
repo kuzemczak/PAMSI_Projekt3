@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 Knight::Knight(Team team, int initialPosition) :
-	Piece(team, "Knight")
+	Piece(KNIGHT, team, "Knight")
 {
 	strength_ = team * 30;
 
@@ -49,8 +49,7 @@ std::vector<int> Knight::get_moves(const std::vector<Piece*> & board, const std:
 				ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
 			else
 			{
-				if (board[pos]->get_team() != team_)
-					ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
+				ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
 			}
 		}
 	}

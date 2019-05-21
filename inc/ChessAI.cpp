@@ -22,10 +22,7 @@ int get_next_move(ChessBoard & board, Team team, int depth)
 		int outcome = 0;
 		if (depth > 1)
 		{
-			if (team == BLACK)
-				outcome = minimax(board, WHITE, depth - 1, ret);
-			else
-				outcome = minimax(board, BLACK, depth - 1, ret);
+			outcome = minimax(board, other_team(team), depth - 1, ret);
 		}
 		else
 			outcome = board.get_strength_balance();
@@ -46,6 +43,7 @@ int minimax(ChessBoard & board, Team team, int depth, int pruningParameter)
 {
 	int ret = -100000 * team;
 	std::vector<int> moves = board.get_possible_moves(team);
+
 	bool pruningCondition = false;
 
 
@@ -55,23 +53,22 @@ int minimax(ChessBoard & board, Team team, int depth, int pruningParameter)
 		int outcome = 0;
 		if (depth > 1)
 		{
-			if (team == BLACK)
-				outcome = minimax(board, WHITE, depth - 1, ret);
-			else
-				outcome = minimax(board, BLACK, depth - 1, ret);
+			outcome = minimax(board, other_team(team), depth - 1, ret);
 		}
 		else
 			outcome = board.get_strength_balance();
 
-		if ((team == BLACK && outcome < ret) ||
-			(team == WHITE && outcome > ret))
+		if (team == BLACK)
 		{
-			ret = outcome;
-			
-			if (team == BLACK)
-				pruningCondition = outcome < pruningParameter;
-			else
-				pruningCondition = outcome > pruningParameter;
+			pruningCondition = outcome < pruningParameter;
+			if (outcome < ret)
+				ret = outcome;
+		}
+		else
+		{
+			pruningCondition = outcome > pruningParameter;
+			if (outcome > ret)
+				ret = outcome;
 		}
 		board.undo_moves(1, true);
 	}

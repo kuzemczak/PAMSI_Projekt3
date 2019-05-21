@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 Bishop::Bishop(Team team, int initialPosition) :
-	Piece(team, "Bishop")
+	Piece(BISHOP, team, "Bishop")
 {
 	strength_ = team * 30;
 
@@ -46,8 +46,7 @@ std::vector<int> Bishop::get_moves(const std::vector<Piece*> & board, const std:
 				ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
 			else
 			{
-				if (board[pos]->get_team() != team_)
-					ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
+				ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
 				break;
 			}
 			if (!has_bits_set(m, RAY_MOVE))

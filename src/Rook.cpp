@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 Rook::Rook(Team team, int initialPosition) :
-	Piece(team, "Rook")
+	Piece(ROOK, team, "Rook")
 {
 	strength_ = team * 50;
 
@@ -48,8 +48,7 @@ std::vector<int> Rook::get_moves(const std::vector<Piece*> & board, const std::v
 				ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
 			else
 			{
-				if (board[pos]->get_team() != team_)
-					ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
+				ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
 				break;
 			}
 			if (!has_bits_set(m, RAY_MOVE))

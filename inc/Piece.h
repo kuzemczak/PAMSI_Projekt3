@@ -22,6 +22,7 @@
 #define NEGATIVE_MOVE (512 << 17)				// negative (opposite direction)
 #define PROMOTION (1024 << 17)					// general Pawn promotion
 #define DOUBLE_PAWN_PUSH  (2048 << 17)	// double pawn push
+#define PAWN_CAPTURE (4096 << 17)				// pawn diagonal capturing move
 
 
 
@@ -35,6 +36,18 @@
 #include "Events.h"
 
 enum Team { BLACK = -1, WHITE = 1};
+Team other_team(Team team);
+
+enum PieceType
+{
+	NONE = 0,
+	PAWN = 1,
+	KNIGHT = 2,
+	BISHOP = 3,
+	ROOK = 4,
+	QUEEN = 5,
+	KING = 6
+};
 
 class Piece : Events
 {
@@ -46,6 +59,7 @@ protected:
 	std::string name_;
 	Rect shape_;
 	Team team_;
+	PieceType type_;
 	int strength_;
 	GLuint moveCntr_;
 	bool captured_;
@@ -53,7 +67,7 @@ protected:
 	int gen_move(int from, int to, int specialBits);
 	
 public:
-	Piece(Team team, std::string name = "");
+	Piece(PieceType type, Team team, std::string name = "");
 	~Piece() {}
 
 	static void set_texture_dir(const std::string & name);
@@ -77,6 +91,7 @@ public:
 	int get_strength();
 	GLuint get_move_count();
 	Team get_team();
+	PieceType get_type();
 	std::string get_name();
 
 	void set_shape_texture(

@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 Pawn::Pawn(Team team, int initialPosition) :
-	Piece(team, "Pawn")
+	Piece(PAWN, team, "Pawn")
 {
 	strength_ = team * 10;
 
@@ -53,6 +53,7 @@ std::vector<int> Pawn::get_moves(const std::vector<Piece*> & board, const std::v
 			pos = GET_TO(m) + boardPosition_;
 		int prevPos = boardPosition_;
 
+
 		if (has_bits_set(m, DOUBLE_PAWN_PUSH))
 		{
 			if (moveCntr_ == 0 &&
@@ -65,7 +66,7 @@ std::vector<int> Pawn::get_moves(const std::vector<Piece*> & board, const std::v
 		else if (has_bits_set(m, EP_CAPTURE))
 		{
 			if (board[pos - team_ * 8] != NULL &&
-				board[pos - team_ * 8]->get_name().compare("Pawn") == 0 &&
+				board[pos - team_ * 8]->get_type() == PAWN &&
 				moveHistory.size() != 0 &&
 				has_bits_set(*(moveHistory.end() - 1), DOUBLE_PAWN_PUSH) &&
 				GET_TO(*(moveHistory.end() - 1)) == (pos - team_ * 8) &&
@@ -78,12 +79,10 @@ std::vector<int> Pawn::get_moves(const std::vector<Piece*> & board, const std::v
 		else if (has_bits_set(m, CAPTURE))
 		{
 			if (pos >= 0 && pos < 64 &&
-				board[pos] != NULL &&
-				board[pos]->get_team() != team_ &&
 				!((prevPos % 8) == 0 && (pos % 8) == 7) &&
 				!((prevPos % 8) == 7 && (pos % 8) == 0))
 			{
-				ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
+				ret.push_back(gen_move(boardPosition_, pos, CAPTURE | PAWN_CAPTURE));
 			}
 		}
 		else if (pos >= 0 && pos < 64 &&
