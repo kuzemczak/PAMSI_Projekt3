@@ -193,6 +193,9 @@ void ChessBoard::do_move(int move, bool noDisplay)
 	moveHistory_.push_back(move);
 
 	movingPiece_ = NULL;
+
+	if (!noDisplay && is_check(currentTeam_))
+		emit_check_event(currentTeam_);
 }
 
 int ChessBoard::do_capture(int move)
@@ -317,7 +320,9 @@ bool ChessBoard::is_square_safe(int square, Team teamCheckingSafety, const std::
 {
 	bool ret = true;
 	if (board_[square] == NULL ||
-		(board_[square] != NULL && board_[square]->get_team() != teamCheckingSafety))
+		(board_[square] != NULL && 
+			(board_[square]->get_team() != teamCheckingSafety && board_[square]->get_type() != KING
+			|| board_[square]->get_team() == teamCheckingSafety && board_[square]->get_type() == KING)))
 	{
 		for (int m : opponentMoves)
 		{
@@ -373,6 +378,28 @@ void ChessBoard::verify_piece_captures(Team pieceTeam, std::vector<int> & moves)
 	{
 		moves.erase(moves.begin() + indicesToErase[i]);
 	}
+}
+
+bool ChessBoard::is_check(Team checkedTeam)
+{
+	std::vector<Piece*> * checkedTeamSet;
+	if (checkedTeam == BLACK)
+		checkedTeamSet = &black_;
+	else
+		checkedTeamSet = &white_;
+
+	Piece * kingPtr = NULL;
+
+	for (Piece * p : *checkedTeamSet)
+		if (p->get_type() == KING)
+			kingPtr = p;
+
+	int position = kingPtr->get_board_position();
+	board_[position] = NULL;
+
+	std::vector<int> opponentMoves = get_possible_moves(other_team(checkedTeam), false);
+	board_[position] = kingPtr;
+	return !is_square_safe(position, checkedTeam, opponentMoves);
 }
 
 void ChessBoard::print_board()

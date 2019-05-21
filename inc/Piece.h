@@ -34,9 +34,8 @@
 
 #include "Rect.h"
 #include "Events.h"
+#include "Team.h"
 
-enum Team { BLACK = -1, WHITE = 1};
-Team other_team(Team team);
 
 enum PieceType
 {

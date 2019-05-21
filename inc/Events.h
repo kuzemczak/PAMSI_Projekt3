@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "vectorUtils.h"
+#include "Team.h"
 
 class Events
 {
@@ -27,6 +28,8 @@ public:
 	virtual void mouse_left_clicked(GLfloat xx, GLfloat yy);
 	static void emit_mouse_left_clicked(GLfloat xx, GLfloat yy);
 
+	virtual void check_event(Team checkedTeam);
+	static void emit_check_event(Team checkedTeam);
 };
 
 #endif

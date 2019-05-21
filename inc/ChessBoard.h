@@ -58,6 +58,7 @@ public:
 	bool is_square_safe(int square, Team teamCheckingSafety, const std::vector<int> & opponentMoves);
 	void verify_king_moves_safety(int kingPos, Team kingTeam, std::vector<int> & moves);
 	void verify_piece_captures(Team pawnTeam, std::vector<int> & moves);
+	bool is_check(Team checkedTeam);
 
 	void print_board();
 

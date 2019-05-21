@@ -3,13 +3,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Team other_team(Team team)
-{
-	if (team == WHITE)
-		return BLACK;
-	return WHITE;
-}
-
 std::string Piece::textureDir = "";
 
 Piece::Piece(PieceType type, Team team, std::string name) :
