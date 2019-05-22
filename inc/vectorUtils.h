@@ -3,7 +3,11 @@
 #include <vector>
 #include <iostream>
 #include <cstdint>
+#include <chrono>
 #include "glm/glm.hpp"
+
+
+typedef std::chrono::high_resolution_clock Clock;
 
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {

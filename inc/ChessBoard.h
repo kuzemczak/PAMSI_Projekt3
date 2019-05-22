@@ -38,6 +38,7 @@ public:
 	void execute();
 
 	void update_board_positions();
+	void update_board_positions(int oldPos, int newPos);
 	void update_screen_positions();
 	void update_move_marks();
 	void draw();
@@ -49,8 +50,11 @@ public:
 	void do_castle(int move);
 	int do_ep_capture(int  move);
 	void undo_moves(int number, bool noDisplay = false);
+	void undo_piece_move(int positionBeforeUndoing, int positionAfterUndoing);
+	void undo_capture(Piece * capturedPiecePtr);
 
 	std::vector<int> get_possible_moves(Team team, bool verifyCaptures = true, bool checkSafety = false);
+	void order_moves(std::vector<int> & moves);
 	int get_strength_balance();
 
 	void board_pos_to_pix(int boardPos, GLfloat & xx, GLfloat & yy);
@@ -59,6 +63,7 @@ public:
 	void verify_king_moves_safety(int kingPos, Team kingTeam, std::vector<int> & moves);
 	void verify_piece_captures(Team pawnTeam, std::vector<int> & moves);
 	bool is_check(Team checkedTeam);
+	bool is_checkmate(Team checkedTeam);
 
 	void print_board();
 

@@ -1,5 +1,3 @@
-#include <chrono>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -17,8 +15,6 @@
 Window * window;
 
 using namespace glm;
-
-typedef std::chrono::high_resolution_clock Clock;
 
 int main()
 {
