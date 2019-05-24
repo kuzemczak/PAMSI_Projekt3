@@ -27,4 +27,6 @@ public:
 		GLuint channels
 	);
 };
+
+void load_shape_texture(Triangles & shape, const std::string & path);
 #endif

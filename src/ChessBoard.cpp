@@ -2,10 +2,12 @@
 
 #include "stb_image.h"
 
-ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight) :
+ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight, GLfloat xPos, GLfloat yPos) :
 	boardPixHeight_(boardPixHeight),
 	boardPixWidth_(boardPixWidth),
-	chessBoard(boardPixWidth, boardPixHeight, boardPixHeight / 2, boardPixWidth / 2, 0.0f)
+	xPos_(xPos),
+	yPos_(yPos),
+	chessBoard(boardPixWidth, boardPixHeight, xPos + boardPixWidth / 2, yPos + boardPixHeight / 2, 0.0f)
 {
 	handle_events(this);
 
@@ -62,6 +64,16 @@ ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight) :
 
 	displayMoveMarks_ = false;
 
+	for (int i = 0; i < 2; i++)
+	{
+		latestMoveMarks_.push_back(new Rect(boardPixHeight_ / 8, -1000, -1000));
+		int width, height, nrChannels;
+		stbi_set_flip_vertically_on_load(true);
+		unsigned char *data = stbi_load("data/full_mark.png", &width, &height, &nrChannels, 0);
+		latestMoveMarks_[i]->generateTexture(data, width, height, nrChannels);
+		stbi_image_free(data);
+	}
+
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char *data = stbi_load("data/chessBoard.png", &width, &height, &nrChannels, 0);
@@ -69,6 +81,17 @@ ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight) :
 	stbi_image_free(data);
 
 	currentTeam_ = WHITE;
+}
+
+ChessBoard::~ChessBoard()
+{
+	unhandle_events(this);
+	for (Piece * p : pieces_)
+		delete p;
+	for (Rect * r : possibleMoveMarks_)
+		delete r;
+	for (Rect * r : latestMoveMarks_)
+		delete r;
 }
 
 void ChessBoard::execute()
@@ -136,6 +159,16 @@ void ChessBoard::update_move_marks()
 	}
 }
 
+void ChessBoard::update_latest_move_marks()
+{
+	GLfloat xx = 0, yy = 0;
+	int latestMove = *(moveHistory_.end() - 1);
+	board_pos_to_pix(GET_FROM(latestMove), xx, yy);
+	latestMoveMarks_[0]->setLocation(glm::vec2(xx, yy));
+	board_pos_to_pix(GET_TO(latestMove), xx, yy);
+	latestMoveMarks_[1]->setLocation(glm::vec2(xx, yy));
+}
+
 void ChessBoard::draw()
 {
 	chessBoard.draw();
@@ -145,6 +178,8 @@ void ChessBoard::draw()
 		for (Rect * r : possibleMoveMarks_)
 			r->draw();
 	}
+	for (Rect * r : latestMoveMarks_)
+		r->draw();
 	for (Piece* p : pieces_)
 	{
 		if (!(p->is_captured()))
@@ -190,15 +225,15 @@ void ChessBoard::do_move(int move, bool noDisplay)
 
 	movingPiece_->move_board(GET_TO(move));
 	update_board_positions(GET_FROM(move), GET_TO(move));
-
-	if (!noDisplay)
-		update_screen_positions();
-
 	change_team();
-
 	moveHistory_.push_back(move);
-
 	movingPiece_ = NULL;
+	
+	if (!noDisplay)
+	{
+		update_screen_positions();
+		update_latest_move_marks();
+	}
 
 	if (!noDisplay && is_check(currentTeam_))
 	{
@@ -270,13 +305,16 @@ void ChessBoard::undo_moves(int number, bool noDisplay)
 		}
 		else if (has_bits_set(m, QUEEN_CASTLE))
 		{
-			int oldPos = from - team, newPos = from + team * 3;
+			int oldPos = from - team, newPos = from - team * 4;
 			undo_piece_move(oldPos, newPos);
 		}
 		change_team();
 
 		if (!noDisplay)
+		{
 			update_screen_positions();
+			update_latest_move_marks();
+		}
 	}
 }
 
@@ -378,16 +416,16 @@ int ChessBoard::get_strength_balance()
 void ChessBoard::board_pos_to_pix(int boardPos, GLfloat & xx, GLfloat	& yy)
 {
 	int rest = boardPos % 8;
-	xx = ((GLfloat)rest + 0.5f) * (boardPixWidth_ / 8);
-	yy = boardPixHeight_ * ((GLfloat)(boardPos - rest) + 4.0f) / 64;
+	xx = xPos_ + ((GLfloat)rest + 0.5f) * (boardPixWidth_ / 8);
+	yy = yPos_ + boardPixHeight_ * ((GLfloat)(boardPos - rest) + 4.0f) / 64;
 }
 
 int ChessBoard::closest_square(GLfloat xx, GLfloat yy)
 {
 	int w8 = static_cast<int>(boardPixWidth_) / 8,
 		h8 = static_cast<int>(boardPixHeight_) / 8,
-		x = static_cast<int>(xx),
-		y = static_cast<int>(yy);
+		x = static_cast<int>(xx) - xPos_,
+		y = static_cast<int>(yy) - yPos_;
 
 	return (x - (x % w8)) / w8 + 8 * (y - (y % h8)) / h8;
 }

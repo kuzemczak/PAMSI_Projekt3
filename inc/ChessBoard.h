@@ -18,11 +18,15 @@ class ChessBoard : Events
 	std::vector<Rect*> possibleMoveMarks_;
 	std::vector<int> possibleMoves_;
 	bool displayMoveMarks_;
+	
+	std::vector<Rect*> latestMoveMarks_;
 
 	std::vector<int> moveHistory_;
 
 	GLfloat boardPixWidth_,
-		boardPixHeight_;
+		boardPixHeight_,
+		xPos_,
+		yPos_;
 
 	Rect chessBoard;
 	
@@ -33,7 +37,8 @@ class ChessBoard : Events
 		strengthBalance_;
 
 public:
-	ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight);
+	ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight, GLfloat xPos = 0.0f, GLfloat yPos = 0.0f);
+	~ChessBoard();
 
 	void execute();
 
@@ -41,6 +46,7 @@ public:
 	void update_board_positions(int oldPos, int newPos);
 	void update_screen_positions();
 	void update_move_marks();
+	void update_latest_move_marks();
 	void draw();
 
 	void change_team();

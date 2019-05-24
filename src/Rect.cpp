@@ -118,7 +118,6 @@ Rect::Rect(GLfloat w, GLfloat h, GLfloat locx, GLfloat locy, GLfloat rot, glm::v
 		break;
 	}
 
-	
 	color[0] = clr[0];
 	color[1] = clr[1];
 	color[2] = clr[2];

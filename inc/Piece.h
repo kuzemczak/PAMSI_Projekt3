@@ -5,6 +5,10 @@
 **/
 #define GET_FROM(i) ((i) & 63)							// decodes destination part of encoded move
 #define GET_TO(i) (((i) >> 6) & 63)					// decodes origin part of encoded move
+#define GET_FROM_X(i) (((i) & 7)
+#define GET_FROM_Y(i) (((i) >> 3) & 7)
+#define GET_TO_X(i) (((i) >> 6) & 7)
+#define GET_TO_Y(i) (((i) >> 9) & 7)
 #define GET_CAPTURED(i) (((i) >> 12) & 31)	// decodes a number of captured piece part of encoded move
 #define MAKE_CAPTURED(i) ((i) << 12)				// encodes a number of captured piece part of a move
 #define ENCODE(from,to,capt,spec) ((from) | ((to) << 6) | ((capt) << 12) | (spec))	// encodes given values in an integer

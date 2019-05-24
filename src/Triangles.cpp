@@ -1,6 +1,7 @@
 #include <string>
 
 #include "Triangles.h"
+#include "stb_image.h"
 
 GLuint Triangles::isTextureUniformID = 0;
 
@@ -194,4 +195,14 @@ void Triangles::generateTexture(unsigned char * textureData, GLuint width, GLuin
 		std::cout << "Bad texture data" << std::endl;
 	}
 	isTexture = 1;
+}
+
+void load_shape_texture(Triangles & shape, const std::string & path)
+{
+	int width, height, nrChannels;
+
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+	shape.generateTexture(data, width, height, nrChannels);
+	stbi_image_free(data);
 }

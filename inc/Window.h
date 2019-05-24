@@ -13,7 +13,9 @@ class Window : public Events
 	///////// mouse history variables
 	GLuint mouseLeftPrevState_;
 	glm::vec2 mousePrevPosition_;
+	glm::vec4 bgColor;
 
+	GLFWcursor* cursor;
 public:
 	Window();
 
@@ -25,6 +27,7 @@ public:
 	void disableCursor();
 	void enableMouseKeys();
 	void disableMouseKeys();
+	void set_cursor(int shape);
 
 	int height();
 	int width();

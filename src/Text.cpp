@@ -20,7 +20,7 @@ void Text::loadFont(std::string name, GLuint size)
 	if (FT_Init_FreeType(&ft))
 		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
 
-	if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
+	if (FT_New_Face(ft, name.c_str(), 0, &face))
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
 	FT_Set_Pixel_Sizes(face, 0, size);
@@ -60,7 +60,7 @@ void Text::loadFont(std::string name, GLuint size)
 			texture,
 			glm::vec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			glm::vec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
+			face->glyph->bitmap_left + face->glyph->bitmap.width//face->glyph->advance.x
 		};
 		Characters.insert(std::pair<GLchar, Character>(c, character));
 	}
@@ -146,7 +146,7 @@ void Text::draw()
 		Character ch = Characters[*c];
 
 		xpos += /*x + */(float)ch.Bearing.x;
-		ypos += /*y - */(float)((float)ch.Size.y - (float)ch.Bearing.y);
+		ypos = /*y - */-(float)((float)ch.Size.y - (float)ch.Bearing.y);
 
 		GLfloat w = (float)ch.Size.x;
 		GLfloat h = (float)ch.Size.y;
@@ -169,7 +169,7 @@ void Text::draw()
 		// Render quad
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		xpos += (ch.Advance >> 6); // Bitshift by 6 to get value in pixels (2^6 = 64)
+		xpos += (ch.Advance); // Bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 	//glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);

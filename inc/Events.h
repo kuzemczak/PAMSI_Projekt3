@@ -30,6 +30,9 @@ public:
 
 	virtual void check_event(Team checkedTeam);
 	static void emit_check_event(Team checkedTeam);
+
+	virtual void new_game();
+	static void emit_new_game();
 };
 
 #endif

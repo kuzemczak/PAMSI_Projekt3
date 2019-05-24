@@ -2,7 +2,8 @@
 
 #include "Window.h"
 
-Window::Window()
+Window::Window() :
+	bgColor(1.0f, 1.0f, 1.0f, 0.0f)
 {
 	mouseLeftPrevState_ = GLFW_RELEASE;
 	mousePrevPosition_ = glm::vec2(0.0f, 0.0f);
@@ -24,6 +25,8 @@ int Window::init(int w, int h, const char * name)
 		return -1;
 	}
 
+	// disable window resizing
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	
 	//glfwWindowHint(GLFW_DECORATED, 0); // ramka i przyciski
 	glfwWindowHint(GLFW_SAMPLES, 4);
@@ -98,6 +101,17 @@ void Window::disableMouseKeys()
 	glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GL_FALSE);
 }
 
+void Window::set_cursor(int shape)
+{
+	if (cursor != NULL)
+	{
+		glfwDestroyCursor(cursor);
+	}
+
+	cursor = glfwCreateStandardCursor(shape);
+	glfwSetCursor(window, cursor);
+}
+
 void Window::setCursorPos(int w, int h)
 {
 	glfwPollEvents();
@@ -106,11 +120,12 @@ void Window::setCursorPos(int w, int h)
 
 void Window::setBgcolor(float r, float g, float b, float a)
 {
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	bgColor = glm::vec4(r, g, b, a);
 }
 
 void Window::clear()
 {
+	glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -141,6 +156,10 @@ bool Window::shouldClose()
 
 void Window::close()
 {
+	if (cursor != NULL)
+	{
+		glfwDestroyCursor(cursor);
+	}
 	glfwTerminate();
 }
 

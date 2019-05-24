@@ -78,3 +78,16 @@ void Events::emit_check_event(Team checkedTeam)
 		e->check_event(checkedTeam);
 	}
 }
+
+void Events::new_game()
+{
+
+}
+
+void Events::emit_new_game()
+{
+	for (Events * e : objects)
+	{
+		e->new_game();
+	}
+}
