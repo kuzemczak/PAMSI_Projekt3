@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 Knight::Knight(Team team, int initialPosition) :
-	Piece(KNIGHT, team, "Knight")
+	Piece(KNIGHT, team, "Night")
 {
 	strength_ = team * 30;
 

@@ -56,11 +56,16 @@ void Text::loadFont(std::string name, GLuint size)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		// Now store character for later use
+		GLuint advance = 0;
+		if (c == ' ')
+			advance = (face->glyph->advance.x) >> 6;
+		else
+			advance = face->glyph->bitmap_left + face->glyph->bitmap.width;
 		Character character = {
 			texture,
 			glm::vec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			glm::vec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->bitmap_left + face->glyph->bitmap.width//face->glyph->advance.x
+			advance
 		};
 		Characters.insert(std::pair<GLchar, Character>(c, character));
 	}

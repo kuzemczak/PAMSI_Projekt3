@@ -7,7 +7,10 @@ ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight, GLfloat xP
 	boardPixWidth_(boardPixWidth),
 	xPos_(xPos),
 	yPos_(yPos),
-	chessBoard(boardPixWidth, boardPixHeight, xPos + boardPixWidth / 2, yPos + boardPixHeight / 2, 0.0f)
+	chessBoard(boardPixWidth, boardPixHeight, xPos + boardPixWidth / 2, yPos + boardPixHeight / 2, 0.0f),
+	whiteKingChecked_(false),
+	blackKingChecked_(false),
+	displayHint_(false)
 {
 	handle_events(this);
 
@@ -67,11 +70,9 @@ ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight, GLfloat xP
 	for (int i = 0; i < 2; i++)
 	{
 		latestMoveMarks_.push_back(new Rect(boardPixHeight_ / 8, -1000, -1000));
-		int width, height, nrChannels;
-		stbi_set_flip_vertically_on_load(true);
-		unsigned char *data = stbi_load("data/full_mark.png", &width, &height, &nrChannels, 0);
-		latestMoveMarks_[i]->generateTexture(data, width, height, nrChannels);
-		stbi_image_free(data);
+		load_shape_texture(*(*(latestMoveMarks_.end() - 1)), "data/full_mark.png");
+		hintMarks_.push_back(new Rect(boardPixHeight_ / 8, -1000, -1000));
+		load_shape_texture(*(*(hintMarks_.end() - 1)), "data/hint_mark.png");
 	}
 
 	int width, height, nrChannels;
@@ -81,6 +82,8 @@ ChessBoard::ChessBoard(GLfloat boardPixWidth, GLfloat boardPixHeight, GLfloat xP
 	stbi_image_free(data);
 
 	currentTeam_ = WHITE;
+
+	fill_PossibleMovesNotChecked_();
 }
 
 ChessBoard::~ChessBoard()
@@ -92,6 +95,42 @@ ChessBoard::~ChessBoard()
 		delete r;
 	for (Rect * r : latestMoveMarks_)
 		delete r;
+}
+
+void ChessBoard::fill_PossibleMovesNotChecked_()
+{
+	for (Piece *p : pieces_)
+	{
+		if (!(p->is_captured()))
+		{
+			possibleMovesNotChecked_.push_back(p->get_moves(board_, moveHistory_));
+		}
+		else
+		{
+			possibleMovesNotChecked_.push_back(std::vector<int>(0));
+		}
+	}
+	for (int i = 0; i < 64; i++)
+		possibleMovesByDestination_.push_back(std::vector<Pair<int, int>>(0));
+	fill_possibleMovesByDestination_();
+}
+
+void ChessBoard::fill_possibleMovesByDestination_()
+{
+	bool visited[64] = { false };
+	for (int i = 0; i < possibleMovesNotChecked_.size(); i++)
+	{
+		for (int m : possibleMovesNotChecked_[i])
+		{
+			int index = GET_TO(m);
+			if (!visited[index])
+			{
+				possibleMovesByDestination_[index].clear();
+				visited[index] = true;
+			}
+			possibleMovesByDestination_[index].push_back(Pair<int, int>(m, i));
+		}
+	}
 }
 
 void ChessBoard::execute()
@@ -144,7 +183,7 @@ void ChessBoard::update_move_marks()
 		delete r;
 	}
 	possibleMoveMarks_.clear();
-	for (int pos : possibleMoves_)
+	for (int pos : selectedPiecePossibleMoves_)
 	{
 		GLfloat x = 0, y = 0;
 		board_pos_to_pix((pos >> 6) & 63, x, y);
@@ -169,6 +208,17 @@ void ChessBoard::update_latest_move_marks()
 	latestMoveMarks_[1]->setLocation(glm::vec2(xx, yy));
 }
 
+void ChessBoard::display_hint(int hintMove)
+{
+	GLfloat xx = 0, yy = 0;
+	board_pos_to_pix(GET_FROM(hintMove), xx, yy);
+	hintMarks_[0]->setLocation(glm::vec2(xx, yy));
+	board_pos_to_pix(GET_TO(hintMove), xx, yy);
+	hintMarks_[1]->setLocation(glm::vec2(xx, yy));
+
+	displayHint_ = true;
+}
+
 void ChessBoard::draw()
 {
 	chessBoard.draw();
@@ -176,6 +226,11 @@ void ChessBoard::draw()
 	if (displayMoveMarks_)
 	{
 		for (Rect * r : possibleMoveMarks_)
+			r->draw();
+	}
+	if (displayHint_)
+	{
+		for (Rect * r : hintMarks_)
 			r->draw();
 	}
 	for (Rect * r : latestMoveMarks_)
@@ -202,7 +257,7 @@ Team ChessBoard::current_team()
 	return currentTeam_;
 }
 
-void ChessBoard::do_move(int move, bool noDisplay)
+void ChessBoard::do_move(int move, bool display, bool updatePossibleMoves, bool evaluateCheck)
 {
 	movingPiece_ = board_[GET_FROM(move)];
 
@@ -213,7 +268,7 @@ void ChessBoard::do_move(int move, bool noDisplay)
 			capturedIndex = do_ep_capture(move);
 		else
 			capturedIndex = do_capture(move);
-
+		
 		if (capturedIndex > -1)
 			move = move | MAKE_CAPTURED(capturedIndex);
 	}
@@ -226,28 +281,63 @@ void ChessBoard::do_move(int move, bool noDisplay)
 	movingPiece_->move_board(GET_TO(move));
 	update_board_positions(GET_FROM(move), GET_TO(move));
 	change_team();
+
 	moveHistory_.push_back(move);
+	if (updatePossibleMoves)
+	{
+		possibleMovesHistory_.push_back(possibleMovesNotChecked_);
+		possibleMovesByDestinationHistory_.push_back(possibleMovesByDestination_);
+		update_possible_moves(movingPiece_->get_team(), move);
+	}
 	movingPiece_ = NULL;
+	if (display && evaluateCheck)
+		std::cout << "hoho";
+	if (evaluateCheck)
+	{
+		if (evaluate_check(currentTeam_))
+		{
+			std::vector<int> tmp;
+			bool b = !evaluate_checkmate(currentTeam_, &tmp);
+			safeMovesIfCheck_ = tmp;
+			std::cout << b << std::endl;
+			if (b)
+			{
+				if (currentTeam_ == BLACK)
+					blackKingChecked_ = true;
+				else
+					whiteKingChecked_ = true;
+				emit_check_event(currentTeam_);
+			}
+			else
+			{
+				emit_checkmate_event(currentTeam_);
+			}
+			//emit_check_event(currentTeam_);
+		}
+		else
+		{
+			if (currentTeam_ == BLACK)
+				blackKingChecked_ = false;
+			else
+				whiteKingChecked_ = false;
+		}
+	}
+
+	kingCheckHistory_.push_back(Pair<bool, bool>(whiteKingChecked_, blackKingChecked_));
 	
-	if (!noDisplay)
+	if (display)
 	{
 		update_screen_positions();
 		update_latest_move_marks();
-	}
-
-	if (!noDisplay && is_check(currentTeam_))
-	{
-		if (is_checkmate(currentTeam_))
-			std::cout << "checkmate!\n";
-		else
-			emit_check_event(currentTeam_);
+		displayHint_ = false;
 	}
 }
 
 int ChessBoard::do_capture(int move)
 {
-	Piece * capturedPtr = board_[GET_TO(move)];
-	board_[GET_TO(move)] = NULL;
+	int to = GET_TO(move);
+	Piece * capturedPtr = board_[to];
+	board_[to] = NULL;
 	
 	capturedPtr->set_captured(true);
 	strengthBalance_ -= capturedPtr->get_strength();
@@ -277,7 +367,7 @@ int ChessBoard::do_ep_capture(int move)
 	return do_capture((GET_TO(move) - movingPiece_->get_team() * 8) << 6);
 }
 
-void ChessBoard::undo_moves(int number, bool noDisplay)
+void ChessBoard::undo_moves(int number, bool display , bool redoPossibleMoves)
 {
 	for (int i = 0; i < number; i++)
 	{
@@ -286,6 +376,18 @@ void ChessBoard::undo_moves(int number, bool noDisplay)
 
 		int m = *(moveHistory_.end() - 1);
 		moveHistory_.pop_back();
+		if (redoPossibleMoves)
+		{
+			possibleMovesNotChecked_ = *(possibleMovesHistory_.end() - 1);
+			possibleMovesByDestination_ = *(possibleMovesByDestinationHistory_.end() - 1);
+			possibleMovesHistory_.pop_back();
+			possibleMovesByDestinationHistory_.pop_back();
+		}
+		Pair<bool, bool> checks = *(kingCheckHistory_.end() - 1);
+		whiteKingChecked_ = checks.first;
+		blackKingChecked_ = checks.second;
+		kingCheckHistory_.pop_back();
+
 		int from = GET_FROM(m),
 			to = GET_TO(m);
 		Piece * undonePiece = board_[to];
@@ -310,7 +412,7 @@ void ChessBoard::undo_moves(int number, bool noDisplay)
 		}
 		change_team();
 
-		if (!noDisplay)
+		if (display)
 		{
 			update_screen_positions();
 			update_latest_move_marks();
@@ -326,12 +428,13 @@ void ChessBoard::undo_piece_move(int positionBeforeUndoing, int positionAfterUnd
 
 void ChessBoard::undo_capture(Piece * capturedPiecePtr)
 {
+	int pos = capturedPiecePtr->get_board_position();
 	capturedPiecePtr->set_captured(false);
-	board_[capturedPiecePtr->get_board_position()] = capturedPiecePtr;
+	board_[pos] = capturedPiecePtr;
 	strengthBalance_ += capturedPiecePtr->get_strength();
 }
 
-std::vector<int> ChessBoard::get_possible_moves(Team team, bool verifyCaptures, bool checkSafety)
+std::vector<int> ChessBoard::generate_possible_moves(Team team, bool verifyCaptures, bool checkSafety)
 {
 	std::vector<int> ret;
 	std::vector<Piece*>* iteratedTeam = NULL;
@@ -368,6 +471,119 @@ std::vector<int> ChessBoard::get_possible_moves(Team team, bool verifyCaptures, 
 	return ret;
 }
 
+void ChessBoard::update_possible_moves(Team movingTeam, int move)
+{
+	int a = 0, b = 0;
+	if (has_bits_set(move, KING_CASTLE))
+		update_possible_moves(movingTeam, (GET_TO(move) + movingTeam) | ((GET_TO(move) - movingTeam) << 6));
+	else if (has_bits_set(move, QUEEN_CASTLE))
+		update_possible_moves(movingTeam, (GET_TO(move) - movingTeam*2) | ((GET_TO(move) + movingTeam) << 6));
+	
+	bool toUpdate[32] = { false };
+	{
+		std::vector<std::vector<Pair<int, int>>*> movesIntersecting = {
+			&(possibleMovesByDestination_[GET_TO(move)]),
+			&(possibleMovesByDestination_[GET_FROM(move)]) };
+		if (has_bits_set(move, EP_CAPTURE))
+			movesIntersecting.push_back(&(possibleMovesByDestination_[GET_TO(move) - movingTeam * 8]));
+		else if (has_bits_set(move, KING_CASTLE))
+		{
+			movesIntersecting.push_back(&(possibleMovesByDestination_[(GET_TO(move) + movingTeam)]));
+			movesIntersecting.push_back(&(possibleMovesByDestination_[(GET_TO(move) - movingTeam)]));
+		}
+		else if (has_bits_set(move, QUEEN_CASTLE))
+		{
+			movesIntersecting.push_back(&(possibleMovesByDestination_[(GET_TO(move) - movingTeam * 2)]));
+			movesIntersecting.push_back(&(possibleMovesByDestination_[(GET_TO(move) + movingTeam)]));
+		}
+
+		for (std::vector<Pair<int, int>> * moves : movesIntersecting)
+		{
+			for (int i = 0; i < moves->size(); i++)
+			{
+				Piece * piecePtr = pieces_[(*moves)[i].second];
+
+				if (!(piecePtr->is_captured()))
+				{
+					toUpdate[(*moves)[i].second] = true;
+				}
+			}
+		}
+	}
+
+	// sprawdzenie, czy ucieczka z en passant
+	if (board_[GET_TO(move)] != NULL &&
+		board_[GET_TO(move)]->get_type() == PAWN &&
+		board_[GET_TO(move)]->get_move_count() == 2)
+	{
+		for (Pair<int, int> m : possibleMovesByDestination_[GET_FROM(move) - movingTeam * 8])
+		{
+			if (has_bits_set(m.first, EP_CAPTURE))
+				toUpdate[m.second] = true;
+		}
+	}
+
+	for (int i = 0; i < pieces_.size(); i++)
+	{
+		Piece * piecePtr = pieces_[i];
+		Team team = piecePtr->get_team();
+		if (toUpdate[i] ||
+			(piecePtr->get_type() == PAWN &&
+				!(piecePtr->is_captured()) &&
+				(GET_FROM(move) == piecePtr->get_board_position() + team * 8 ||
+				(piecePtr->get_move_count() == 0 && GET_FROM(move) == piecePtr->get_board_position() + team * 16) ||
+					(has_bits_set(move, DOUBLE_PAWN_PUSH) && 
+						((GET_TO(move) % 8 > 0 && piecePtr->get_board_position() == GET_TO(move) - 1) ||
+						(GET_TO(move) % 8 < 7 && piecePtr->get_board_position() == GET_TO(move) + 1))))))
+		{
+			possibleMovesNotChecked_[i] = piecePtr->get_moves(board_, moveHistory_);
+		}
+	}
+	fill_possibleMovesByDestination_();
+}
+
+std::vector<int> ChessBoard::get_possible_moves(Team team, bool verifyCaptures, bool checkSafety, bool allowChecksafeMoves)
+{
+	std::vector<int> ret;
+
+	if (allowChecksafeMoves &&
+		checkSafety &&
+		(team == WHITE && whiteKingChecked_ ||
+			team == BLACK && blackKingChecked_))
+	{
+		//evaluate_checkmate(team, &ret);
+		ret = safeMovesIfCheck_;
+	}
+	else
+	{
+		int offset = 0;
+		if (team == BLACK)
+			offset = white_.size();
+
+		for (int i = 0; i < white_.size(); i++)
+		{
+			if (!(pieces_[i + offset]->is_captured()))
+			{
+				std::vector<int> moves = possibleMovesNotChecked_[i + offset];
+				if (pieces_[i + offset]->get_type() == KING &&
+					checkSafety)
+				{
+					verify_king_moves_safety(pieces_[i + offset]->get_board_position(), team, moves);
+				}
+				ret.insert(ret.end(), moves.begin(), moves.end());
+			}
+		}
+
+		if (verifyCaptures)
+		{
+			verify_piece_captures(team, ret);
+			order_moves(ret);
+		}
+	}
+
+	return ret;
+}
+
 void ChessBoard::order_moves(std::vector<int> & moves)
 {
 	std::vector<int> ret, kingCaps, queenCaps, pawnCaps, otherCaps, otherMoves;
@@ -399,11 +615,16 @@ void ChessBoard::order_moves(std::vector<int> & moves)
 		}
 	}
 
-	ret.insert(ret.end(), kingCaps.begin(), kingCaps.end());
-	ret.insert(ret.end(), queenCaps.begin(), queenCaps.end());
-	ret.insert(ret.end(), otherCaps.begin(), otherCaps.end());
-	ret.insert(ret.end(), pawnCaps.begin(), pawnCaps.end());
-	ret.insert(ret.end(), otherMoves.begin(), otherMoves.end());
+	if (kingCaps.size() > 0)
+		ret.insert(ret.end(), kingCaps.begin(), kingCaps.end());
+	if (queenCaps.size() > 0)
+		ret.insert(ret.end(), queenCaps.begin(), queenCaps.end());
+	if (otherCaps.size() > 0)
+		ret.insert(ret.end(), otherCaps.begin(), otherCaps.end());
+	if (pawnCaps.size() > 0)
+		ret.insert(ret.end(), pawnCaps.begin(), pawnCaps.end());
+	if (otherMoves.size() > 0)
+		ret.insert(ret.end(), otherMoves.begin(), otherMoves.end());
 
 	moves = ret;
 }
@@ -457,17 +678,13 @@ void ChessBoard::verify_king_moves_safety(int kingPos, Team kingTeam, std::vecto
 	std::vector<int> indicesToErase;
 	Piece * ptr = board_[kingPos];
 	board_[kingPos] = NULL;
-	std::vector<int> opponentMoves = get_possible_moves(other_team(kingTeam), false);
-	for (int i = 0; i < moves.size(); i++)
+	std::vector<int> opponentMoves = generate_possible_moves(other_team(kingTeam), false);
+	for (int i = moves.size() - 1; i > -1; i--)
 	{
 		if (!is_square_safe(GET_TO(moves[i]), kingTeam, opponentMoves))
 		{
-			indicesToErase.push_back(i);
+			moves.erase(moves.begin() + i);
 		}
-	}
-	for (int i = indicesToErase.size() - 1; i > -1; i--)
-	{
-		moves.erase(moves.begin() + indicesToErase[i]);
 	}
 	board_[kingPos] = ptr;
 }
@@ -478,6 +695,7 @@ void ChessBoard::verify_piece_captures(Team pieceTeam, std::vector<int> & moves)
 	for (int i = moves.size() - 1; i > -1; i--)
 	{
 		int to = GET_TO(moves[i]);
+
 		if ((has_bits_set(moves[i], PAWN_CAPTURE) &&
 			(board_[to] == NULL ||
 			(board_[to] != NULL && board_[to]->get_team() == pieceTeam))) ||
@@ -490,7 +708,7 @@ void ChessBoard::verify_piece_captures(Team pieceTeam, std::vector<int> & moves)
 	}
 }
 
-bool ChessBoard::is_check(Team checkedTeam)
+bool ChessBoard::evaluate_check(Team checkedTeam)
 {
 	std::vector<Piece*> * checkedTeamSet;
 	if (checkedTeam == BLACK)
@@ -502,44 +720,69 @@ bool ChessBoard::is_check(Team checkedTeam)
 
 	for (Piece * p : *checkedTeamSet)
 		if (p->get_type() == KING)
+		{
 			kingPtr = p;
+			break;
+		}
 
 	int position = kingPtr->get_board_position();
-	board_[position] = NULL;
+	//board_[position] = NULL;
 
 	std::vector<int> opponentMoves = get_possible_moves(other_team(checkedTeam), false);
-	board_[position] = kingPtr;
+	//board_[position] = kingPtr;
 	return !is_square_safe(position, checkedTeam, opponentMoves);
 }
 
-bool ChessBoard::is_checkmate(Team checkedTeam)
+bool ChessBoard::evaluate_checkmate(Team checkedTeam, std::vector<int> *safeMovesContainer)
 {
-	std::vector<int> moves = get_possible_moves(checkedTeam, true, true);
+	std::vector<int> moves = get_possible_moves(checkedTeam, true, true, false);
 
 	for (int m : moves)
 	{
-		do_move(m);
-		if (!is_check(checkedTeam))
+		do_move(m, false,true,false);
+		if (!evaluate_check(checkedTeam))
 		{
-			undo_moves(1);
-			return false;
+			if (safeMovesContainer == NULL)
+			{
+				undo_moves(1, true);
+				return false;
+			}
+			else
+			{
+				safeMovesContainer->push_back(m);
+			}
 		}
-		undo_moves(1);
+		undo_moves(1, true);
 	}
 
+	if (safeMovesContainer != NULL)
+	{
+		if (safeMovesContainer->size() > 0)
+			return false;
+	}
 	return true;
+
+
+}
+
+bool ChessBoard::is_king_checked(Team checkedTeam)
+{
+	if (checkedTeam == WHITE)
+		return blackKingChecked_;
+	return whiteKingChecked_;
 }
 
 void ChessBoard::print_board()
 {
-	for (int i = 0; i < board_.size(); i++)
+	for (int i = board_.size() - 1; i > -1; i--)
 	{
-		if (i % 8 == 0)
+		int index = (i - (2 * (i % 8))) + 7;
+		if (i % 8 == 7)
 			std::cout << std::endl;
-		if (board_[i] == NULL)
-			std::cout << "\t, ";
+		if (board_[index] == NULL)
+			std::cout << " | ";
 		else
-			std::cout << board_[i]->get_name() << ", ";
+			std::cout << board_[index]->get_name()[0] << "| ";
 	}
 	std::cout << std::endl;
 }
@@ -556,17 +799,17 @@ void ChessBoard::mouse_left_pressed(GLfloat xx, GLfloat yy)
 				p->get_team() == currentTeam_ &&
 				p->shape_contains(xx, yy))
 			{
-				possibleMoves_ = p->get_moves(board_, moveHistory_);
+				selectedPiecePossibleMoves_ = p->get_moves(board_, moveHistory_);
 
-				if (possibleMoves_.size() != 0)
+				if (selectedPiecePossibleMoves_.size() != 0)
 				{
 					if (p->get_type() == KING)
 					{
 						verify_king_moves_safety(p->get_board_position(), 
 							currentTeam_,
-							possibleMoves_);
+							selectedPiecePossibleMoves_);
 					}
-					verify_piece_captures(currentTeam_, possibleMoves_);
+					verify_piece_captures(currentTeam_, selectedPiecePossibleMoves_);
 					update_move_marks();
 					displayMoveMarks_ = true;
 					pieceSelected = true;
@@ -590,10 +833,10 @@ void ChessBoard::mouse_left_pressed(GLfloat xx, GLfloat yy)
 			}
 		};
 
-		auto comp = std::find_if(possibleMoves_.begin(),
-			possibleMoves_.end(), compare(closestPos << 6));
+		auto comp = std::find_if(selectedPiecePossibleMoves_.begin(),
+			selectedPiecePossibleMoves_.end(), compare(closestPos << 6));
 
-		if (comp != possibleMoves_.end())
+		if (comp != selectedPiecePossibleMoves_.end())
 		{
 			do_move(*comp);
 		}
@@ -602,7 +845,7 @@ void ChessBoard::mouse_left_pressed(GLfloat xx, GLfloat yy)
 			movingPiece_ = NULL;
 		}
 
-		possibleMoves_.clear();
+		selectedPiecePossibleMoves_.clear();
 		update_move_marks();
 		pieceSelected = NULL;
 	}

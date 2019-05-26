@@ -79,15 +79,40 @@ void Events::emit_check_event(Team checkedTeam)
 	}
 }
 
-void Events::new_game()
+void Events::checkmate_event(Team checkedTeam)
 {
-
 }
 
-void Events::emit_new_game()
+void Events::emit_checkmate_event(Team checkedTeam)
 {
 	for (Events * e : objects)
 	{
-		e->new_game();
+		e->checkmate_event(checkedTeam);
 	}
 }
+
+//void Events::new_game()
+//{
+//
+//}
+//
+//void Events::emit_new_game()
+//{
+//	for (Events * e : objects)
+//	{
+//		e->new_game();
+//	}
+//}
+
+//void Events::hint_event(int hintMove)
+//{
+//
+//}
+//
+//void Events::emit_hint_event(int hintMove)
+//{
+//	for (Events * e : objects)
+//	{
+//		e->hint_event(hintMove);
+//	}
+//}

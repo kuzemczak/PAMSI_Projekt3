@@ -1,5 +1,7 @@
 #include "vectorUtils.h"
 
+std::mt19937 gen{ std::random_device{}() };
+
 std::ostream& operator<< (std::ostream& out, const glm::mat3 & v)
 {
 	for (int i = 0; i < 3; i++)

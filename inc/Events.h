@@ -31,8 +31,16 @@ public:
 	virtual void check_event(Team checkedTeam);
 	static void emit_check_event(Team checkedTeam);
 
-	virtual void new_game();
-	static void emit_new_game();
+	virtual void checkmate_event(Team checkedTeam);
+	static void emit_checkmate_event(Team checkedTeam);
+
+	//virtual void new_game();
+	//static void emit_new_game();
+	//
+	//virtual void hint_event(int hintMove);
+	//static void emit_hint_event(int hintMove);
+
+
 };
 
 #endif

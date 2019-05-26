@@ -45,10 +45,10 @@ std::vector<int> Rook::get_moves(const std::vector<Piece*> & board, const std::v
 			)
 		{
 			if (board[pos] == NULL)
-				ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
+				ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE | RAY_MOVE));
 			else
 			{
-				ret.push_back(gen_move(boardPosition_, pos, CAPTURE));
+				ret.push_back(gen_move(boardPosition_, pos, CAPTURE | RAY_MOVE));
 				break;
 			}
 			if (!has_bits_set(m, RAY_MOVE))

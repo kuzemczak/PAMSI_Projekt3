@@ -5,9 +5,10 @@
 #include <cstdint>
 #include <chrono>
 #include "glm/glm.hpp"
+#include "randutils.hpp"
 
 
-typedef std::chrono::high_resolution_clock Clock;
+typedef std::chrono::high_resolution_clock Clock_t;
 
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
@@ -49,3 +50,19 @@ std::ostream& operator<< (std::ostream& out, const glm::vec3 & v);
 std::ostream& operator<< (std::ostream& out, const glm::vec4 & v);
 
 bool has_bits_set(int integer, int bits);
+
+extern std::mt19937 gen;
+
+template<typename T>
+T random(T min, T max) {
+	return std::uniform_int_distribution<T>{min, max}(gen);
+}
+
+class GraphicalGameObjectInterface
+{
+public:
+	virtual ~GraphicalGameObjectInterface() {}
+
+	virtual void draw() {}
+	virtual void update() {}
+};

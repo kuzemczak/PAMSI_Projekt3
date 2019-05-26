@@ -4,7 +4,7 @@
 #include "Rect.h"
 #include "Text.h"
 
-class BalanceDisplay
+class BalanceDisplay : public GraphicalGameObjectInterface
 {
 	Rect * left_;
 	Rect * right_;

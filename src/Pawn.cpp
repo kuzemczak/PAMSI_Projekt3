@@ -65,9 +65,12 @@ std::vector<int> Pawn::get_moves(const std::vector<Piece*> & board, const std::v
 		}
 		else if (has_bits_set(m, EP_CAPTURE))
 		{
-			if (board[pos - team_ * 8] != NULL &&
+			if (pos - team_ * 8 > 0 &&
+				pos - team_ * 8 < 63 && 
+				board[pos - team_ * 8] != NULL &&
 				board[pos - team_ * 8]->get_type() == PAWN &&
-				moveHistory.size() != 0 &&
+				board[pos - team_ * 8]->get_team() != team_ &&
+				moveHistory.size() > 0 &&
 				has_bits_set(*(moveHistory.end() - 1), DOUBLE_PAWN_PUSH) &&
 				GET_TO(*(moveHistory.end() - 1)) == (pos - team_ * 8) &&
 				!((prevPos % 8) == 0 && (pos % 8) == 7) &&
@@ -85,10 +88,11 @@ std::vector<int> Pawn::get_moves(const std::vector<Piece*> & board, const std::v
 				ret.push_back(gen_move(boardPosition_, pos, CAPTURE | PAWN_CAPTURE));
 			}
 		}
-		else if (pos >= 0 && pos < 64 &&
+		else if (!has_bits_set(m, PROMOTION) &&
+			pos >= 0 && pos < 64 &&
 			board[pos] == NULL)
 		{
-			ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE));
+			ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE | PAWN_PUSH));
 		}
 	}
 

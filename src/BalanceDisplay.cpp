@@ -27,7 +27,7 @@ BalanceDisplay::BalanceDisplay(GLfloat xx,
 {
 	valueText_.setLocation(glm::vec2(xx - width/2, yy - height/2 - 22));
 	valueText_.generateShaders();
-	valueText_.loadFont("fonts/arial.ttf", 20);
+	valueText_.loadFont("fonts/tt0351m_.ttf", 20);
 
 	left_ = NULL;
 	right_ = NULL;
@@ -44,6 +44,9 @@ void BalanceDisplay::draw()
 
 void BalanceDisplay::set_value(int val)
 {
+	if (value_ == val)
+		return;
+	
 	value_ = val;
 	valueText_.setText(std::to_string(val));
 	update_rects();

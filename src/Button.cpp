@@ -7,14 +7,16 @@ Button::Button(const std::string & text,
 	GLfloat yy, 
 	GLfloat width, 
 	GLfloat height,
-	Window * parentWindow) :
+	Window * parentWindow,
+	bool * flagToSetOnRelease) :
 	shape_(width, height, xx, yy, 0.0f),
 	shape_pressed_(width, height, xx, yy, 0.0f),
 	icon_(0.6 * height, xx, yy),
 	pressed_(false),
 	isIcon_(false),
 	prevMouseOver_(false),
-	parentWindow_(parentWindow)
+	parentWindow_(parentWindow),
+	flagToSetOnRelease_(flagToSetOnRelease)
 {
 	handle_events(this);
 
@@ -90,5 +92,8 @@ void Button::mouse_dragged(GLfloat xx, GLfloat yy)
 
 void Button::mouse_left_released(GLfloat xx, GLfloat yy)
 {
+	if (shape_.contains(xx, yy) && pressed_)
+		*flagToSetOnRelease_ = true;
 	pressed_ = false;
+
 }

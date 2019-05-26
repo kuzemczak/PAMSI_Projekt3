@@ -27,6 +27,8 @@
 #define PROMOTION (1024 << 17)					// general Pawn promotion
 #define DOUBLE_PAWN_PUSH  (2048 << 17)	// double pawn push
 #define PAWN_CAPTURE (4096 << 17)				// pawn diagonal capturing move
+#define PAWN_PUSH (8192 << 17)					// pawn push
+// jeszcze jeden wolny bit
 
 
 
