@@ -11,7 +11,7 @@ Popup::Popup(GLfloat xx, GLfloat yy,
 	load_shape_texture(*background_, "data/popup_bg.png");
 
 	text_ = new Text(text);
-	text_->setLocation(glm::vec2(xx - 0.5 * width + height * 0.45, yy));
+	text_->setLocation(glm::vec2(xx - 0.5 * width + height*0.7, yy));
 	text_->generateShaders();
 	text_->loadFont("fonts/segoeui.ttf", 0.1*height);
 

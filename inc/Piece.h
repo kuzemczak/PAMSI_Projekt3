@@ -118,7 +118,7 @@ public:
 class King : public Piece
 {
 public:
-	King(Team team);
+	King(Team team, int initialPosition);
 	~King() {}
 
 	std::vector<int> get_moves(const std::vector<Piece*> & board, const std::vector<int> & moveHistory);
@@ -127,7 +127,7 @@ public:
 class Queen : public Piece
 {
 public:
-	Queen(Team team);
+	Queen(Team team, int initialPosition);
 	~Queen() {}
 
 	std::vector<int> get_moves(const std::vector<Piece*> & board, const std::vector<int> & moveHistory);

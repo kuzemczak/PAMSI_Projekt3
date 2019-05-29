@@ -1,6 +1,6 @@
 #include "Piece.h"
 
-Queen::Queen(Team team) :
+Queen::Queen(Team team, int initialPosition) :
 	Piece(QUEEN, team, "Queen")
 {
 	strength_ = team * 90;
@@ -23,18 +23,13 @@ Queen::Queen(Team team) :
 
 	if (team == WHITE)
 	{
-		set_init_position(3);
 		s.append("_bialy");
-	}
-	else
-	{
-		set_init_position(60);
 	}
 
 	s.append(".png");
 	load_shape_texture(s);
 
-	
+	set_init_position(initialPosition);
 }
 
 std::vector<int> Queen::get_moves(const std::vector<Piece*> & board, const std::vector<int> & moveHistory)

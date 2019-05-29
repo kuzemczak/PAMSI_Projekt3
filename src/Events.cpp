@@ -68,7 +68,7 @@ void Events::emit_mouse_left_clicked(GLfloat xx, GLfloat yy)
 
 void Events::check_event(Team checkedTeam)
 {
-	std::cout << checkedTeam << " King is in check!\n";
+	//std::cout << checkedTeam << " King is in check!\n";
 }
 
 void Events::emit_check_event(Team checkedTeam)

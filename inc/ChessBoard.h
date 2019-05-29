@@ -40,6 +40,7 @@ class ChessBoard : Events, public GraphicalGameObjectInterface
 
 	bool displayMoveMarks_;
 	bool displayHint_;
+	bool enabled_;
 	
 	std::vector<Rect*> latestMoveMarks_;
 
@@ -74,6 +75,8 @@ public:
 
 
 	void execute();
+	void enable();
+	void disable();
 
 	void update_board_positions();
 	void update_board_positions(int oldPos, int newPos);
@@ -101,7 +104,7 @@ public:
 
 	void board_pos_to_pix(int boardPos, GLfloat & xx, GLfloat & yy);
 	int closest_square(GLfloat xx, GLfloat yy);
-	bool is_square_safe(int square, Team teamCheckingSafety, const std::vector<int> & opponentMoves);
+	bool is_square_safe(int square, Team teamCheckingSafety/*, const std::vector<int> & opponentMoves*/);
 	void verify_king_moves_safety(int kingPos, Team kingTeam, std::vector<int> & moves);
 	void verify_piece_captures(Team pawnTeam, std::vector<int> & moves);
 	bool evaluate_check(Team checkedTeam);

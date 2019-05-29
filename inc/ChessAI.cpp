@@ -38,7 +38,7 @@ int get_next_move(ChessBoard & board, Team team, int depth)
 			bestMoveIndices.push_back(i);
 		}
 	}
-	ret = moves[bestMoveIndices[0]];//random(0, (int)bestMoveIndices.size() - 1)]];
+	ret = moves[bestMoveIndices[random(0, (int)bestMoveIndices.size() - 1)]];
 	//board.do_move(moves[bestMoveIndex]);
 	//std::cout << "moving time: " << cntr << std::endl;
 

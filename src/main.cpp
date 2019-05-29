@@ -113,9 +113,9 @@ int main()
 		//clock.update();
 
 		window->clear();
-		window->process_events();
 
 		game.update();
+		window->process_events();
 		game.draw();
 		//board->draw();
 		//button.draw();

@@ -87,12 +87,16 @@ void Button::mouse_left_pressed(GLfloat xx, GLfloat yy)
 
 void Button::mouse_dragged(GLfloat xx, GLfloat yy)
 {
-	pressed_ = shape_.contains(xx, yy);
+	bool tmp = shape_.contains(xx, yy);
+	if (tmp != pressed_)
+	{
+		pressed_ = tmp;
+	}
 }
 
 void Button::mouse_left_released(GLfloat xx, GLfloat yy)
 {
-	if (shape_.contains(xx, yy) && pressed_)
+	if (shape_.contains(xx, yy) && pressed_ && flagToSetOnRelease_ != NULL)
 		*flagToSetOnRelease_ = true;
 	pressed_ = false;
 

@@ -132,6 +132,7 @@ void Window::clear()
 void Window::swapBuffers()
 {
 	glfwSwapBuffers(window);
+
 	glfwPollEvents();
 }
 

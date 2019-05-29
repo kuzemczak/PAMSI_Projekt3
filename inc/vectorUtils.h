@@ -63,6 +63,7 @@ class GraphicalGameObjectInterface
 public:
 	virtual ~GraphicalGameObjectInterface() {}
 
+
 	virtual void draw() {}
 	virtual void update() {}
 };

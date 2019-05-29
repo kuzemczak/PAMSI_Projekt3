@@ -24,6 +24,7 @@ Game::Game(Window * parentWindow) :
 	clock_ = new Clock(610, 440, 380, 150, glm::vec4(0.643f, 0.267f, 0.067f, 0.0f));
 
 	gameEndPopup_ = new Popup(300, 300, 400, 133, "");
+	gameEndPopup_->load_icon("data/cup_icon.png");
 
 	objects_.push_back(board_);
 	objects_.push_back(clock_);
@@ -57,7 +58,12 @@ void Game::update()
 
 	if (board_->current_team() == BLACK)
 	{
-		board_->do_move(get_next_move(*board_, BLACK, 3));
+		auto t0 = Clock_t::now();
+		int move = get_next_move(*board_, BLACK, 4);
+		auto t1 = Clock_t::now();
+		std::cout << "time: "
+			<< static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
+		board_->do_move(move);
 	}
 }
 
@@ -92,10 +98,11 @@ void Game::checkmate_event(Team checkedTeam)
 	else
 		s.append("Biale");
 
-	s.append("wygraly gre!");
+	s.append(" wygraly gre!");
 
 	gameEndPopup_->set_text(s);
 	gameEndPopup_->show();
+	board_->disable();
 }
 
 void Game::check_event(Team checkedTeam)
