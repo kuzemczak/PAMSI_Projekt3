@@ -59,7 +59,7 @@ void Game::update()
 	if (board_->current_team() == BLACK)
 	{
 		auto t0 = Clock_t::now();
-		int move = get_next_move(*board_, BLACK, 3);
+		int move = get_next_move(*board_, BLACK, 4);
 		auto t1 = Clock_t::now();
 		std::cout << "time: "
 			<< static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
