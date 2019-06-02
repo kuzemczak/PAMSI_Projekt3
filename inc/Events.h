@@ -34,6 +34,9 @@ public:
 	virtual void checkmate_event(Team checkedTeam);
 	static void emit_checkmate_event(Team checkedTeam);
 
+	virtual void promo_event(int square);
+	static void emit_promo_event(int square);
+
 	//virtual void new_game();
 	//static void emit_new_game();
 	//

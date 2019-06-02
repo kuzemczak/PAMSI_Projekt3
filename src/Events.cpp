@@ -91,6 +91,19 @@ void Events::emit_checkmate_event(Team checkedTeam)
 	}
 }
 
+void Events::promo_event(int square)
+{
+
+}
+
+void Events::emit_promo_event(int square)
+{
+	for (Events * e : objects)
+	{
+		e->promo_event(square);
+	}
+}
+
 //void Events::new_game()
 //{
 //

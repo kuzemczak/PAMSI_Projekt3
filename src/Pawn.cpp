@@ -88,8 +88,13 @@ std::vector<int> Pawn::get_moves(const std::vector<Piece*> & board, const std::v
 				ret.push_back(gen_move(boardPosition_, pos, CAPTURE | PAWN_CAPTURE));
 			}
 		}
-		else if (!has_bits_set(m, PROMOTION) &&
-			pos >= 0 && pos < 64 &&
+		else if (has_bits_set(m, PROMOTION) && 
+			((pos > 55 && pos < 64) || (pos > -1 && pos < 8)) &&
+			board[pos] == NULL)
+		{
+			ret.push_back(gen_move(boardPosition_, pos, PAWN_PUSH | Q_PROMO));
+		}
+		else if (pos >= 0 && pos < 64 &&
 			board[pos] == NULL)
 		{
 			ret.push_back(gen_move(boardPosition_, pos, QUIET_MOVE | PAWN_PUSH));
