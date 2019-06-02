@@ -24,6 +24,7 @@ class ChessBoard : Events, public GraphicalGameObjectInterface
 	std::vector<Piece*> white_;
 	std::vector<Piece*> black_;
 	std::vector<Piece*> pieces_;
+	std::vector<Piece*> promotedPawns_;
 	Piece * movingPiece_;
 
 	std::vector<Rect*> possibleMoveMarks_;
@@ -91,9 +92,11 @@ public:
 	int do_capture(int move);
 	void do_castle(int move);
 	int do_ep_capture(int  move);
+	void do_promo(int move);
 	void undo_moves(int number, bool display = true, bool redoPossibleMoves = true);
 	void undo_piece_move(int positionBeforeUndoing, int positionAfterUndoing);
 	void undo_capture(Piece * capturedPiecePtr);
+	void undo_promo(int undoneMove);
 
 	std::vector<int> generate_possible_moves(Team team, bool verifyCaptures = true, bool checkSafety = false);
 	void update_possible_moves(Team movingTeam, int move);

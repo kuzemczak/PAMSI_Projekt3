@@ -392,6 +392,39 @@ int ChessBoard::do_ep_capture(int move)
 	return do_capture((GET_TO(move) - movingPiece_->get_team() * 8) << 6);
 }
 
+// Metoda realizujaca promocje
+// Musi byc uzyta po wykonaniu ruchu
+void ChessBoard::do_promo(int move)
+{
+	int to = GET_TO(move);
+	Piece * ptr = board_[to];
+	if (ptr == NULL)
+		return;
+	Piece * queen = new Queen(ptr->get_team(), to);
+
+	movingPiece_ = queen;
+	int i = find_i(pieces_, ptr);
+	if (i > -1)
+		pieces_[i] = queen;
+	board_[to] = queen;
+	std::vector<Piece*> *teamPieceVector;
+
+	if (ptr->get_team() == WHITE)
+	{
+		teamPieceVector = &white_;
+	}
+	else
+	{
+		teamPieceVector = &black_;
+	}
+
+	i = find_i(*teamPieceVector, ptr);
+	if (i > -1)
+		(*teamPieceVector)[i] = queen;
+
+	promotedPawns_.push_back(ptr);
+}
+
 // Metoda cofajaca podana ilosc ruchow zapisanych w historii
 void ChessBoard::undo_moves(int number, bool display , bool redoPossibleMoves)
 {
@@ -460,6 +493,13 @@ void ChessBoard::undo_capture(Piece * capturedPiecePtr)
 	capturedPiecePtr->set_captured(false);
 	board_[pos] = capturedPiecePtr;
 	strengthBalance_ += capturedPiecePtr->get_strength();
+}
+
+// Metoda cofajaca promocje 
+// Musi byc wywolana przed cofnieciem ruchu
+void undo_promo(int undoneMove)
+{
+
 }
 
 // Metoda generujaca mozliwe ruchy
