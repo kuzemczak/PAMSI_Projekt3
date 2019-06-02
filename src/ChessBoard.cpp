@@ -98,6 +98,8 @@ ChessBoard::~ChessBoard()
 		delete r;
 }
 
+// Metoda wypelniajaca liste dostepnych ruchow
+// niesprawdzonych pod katem bicia swoich
 void ChessBoard::fill_PossibleMovesNotChecked_()
 {
 	for (Piece *p : pieces_)
@@ -116,6 +118,8 @@ void ChessBoard::fill_PossibleMovesNotChecked_()
 	fill_possibleMovesByDestination_();
 }
 
+// Metoda wypelniajaca liste dostepnych ruchow
+// ulozonych wzgledem pola docelowego
 void ChessBoard::fill_possibleMovesByDestination_()
 {
 	bool visited[64] = { false };
@@ -134,26 +138,19 @@ void ChessBoard::fill_possibleMovesByDestination_()
 	}
 }
 
-void ChessBoard::execute()
-{
-	/*if (aiTurn_)
-	{
-		int move = ChessAI::get_next_move(BLACK, board_, moveHistory_);
-		do_move(move);
-		aiTurn_ = false;
-	}*/
-}
-
+// Wlaczenie reagowania planszy na zdarzenia myszy
 void ChessBoard::enable()
 {
 	enabled_ = true;
 }
 
+// Wylaczenie reagowania planszy na zdarzenia myszy
 void ChessBoard::disable()
 {
 	enabled_ = false;
 }
 
+// Zaktualizowanie listy figur wg ich pozycji
 void ChessBoard::update_board_positions()
 {
 	for (int i = 0; i < 64; i++)
@@ -168,12 +165,15 @@ void ChessBoard::update_board_positions()
 	}
 }
 
+// Zaktualizowanie pozycji jednej figury
+// na liscie figur wg pozycji
 void ChessBoard::update_board_positions(int oldPos, int newPos)
 {
 	board_[newPos] = board_[oldPos];
 	board_[oldPos] = NULL;
 }
 
+// Zaktualizwoanie pozycji figur na ekranie
 void ChessBoard::update_screen_positions()
 {
 	for (Piece * p : pieces_)
@@ -187,6 +187,7 @@ void ChessBoard::update_screen_positions()
 	}
 }
 
+// zaktualizowanie znacznikow dostepnych ruchow figury
 void ChessBoard::update_move_marks()
 {
 	for (Rect * r : possibleMoveMarks_)
@@ -209,6 +210,7 @@ void ChessBoard::update_move_marks()
 	}
 }
 
+// zaktualizowanie znacznikow ostatniego ruchu
 void ChessBoard::update_latest_move_marks()
 {
 	GLfloat xx = 0, yy = 0;
@@ -219,6 +221,7 @@ void ChessBoard::update_latest_move_marks()
 	latestMoveMarks_[1]->setLocation(glm::vec2(xx, yy));
 }
 
+// Wyswietlenie znacznikow podpowiedzi
 void ChessBoard::display_hint(int hintMove)
 {
 	GLfloat xx = 0, yy = 0;
@@ -230,6 +233,7 @@ void ChessBoard::display_hint(int hintMove)
 	displayHint_ = true;
 }
 
+// Rysowanie wszystkiego
 void ChessBoard::draw()
 {
 	chessBoard.draw();
@@ -253,6 +257,7 @@ void ChessBoard::draw()
 	}
 }
 
+// Zmiana druzyny wykonujacej ruch
 void ChessBoard::change_team()
 {
 	if (currentTeam_ == WHITE)
@@ -263,11 +268,14 @@ void ChessBoard::change_team()
 		currentTeam_ = WHITE;
 }
 
+// Metoda zwracajaca druzyne wykonujaca ruch
 Team ChessBoard::current_team()
 {
 	return currentTeam_;
 }
 
+// Metoda wykonujaca wszystkie czynnosci potrzebne,
+// aby zrealizowac ruch figury
 void ChessBoard::do_move(int move, bool display, bool updatePossibleMoves, bool evaluateCheck)
 {
 	movingPiece_ = board_[GET_FROM(move)];
@@ -347,6 +355,7 @@ void ChessBoard::do_move(int move, bool display, bool updatePossibleMoves, bool 
 	}
 }
 
+// Metoda realizujaca przechwycenie figury
 int ChessBoard::do_capture(int move)
 {
 	int to = GET_TO(move);
@@ -359,6 +368,7 @@ int ChessBoard::do_capture(int move)
 	return find_i(pieces_, capturedPtr);
 }
 
+// Metoda realizujaca roszade
 void ChessBoard::do_castle(int move)
 {
 	int from = 0, to = 0;
@@ -376,11 +386,13 @@ void ChessBoard::do_castle(int move)
 	update_board_positions(from, to);
 }
 
+// Metoda wykonujaca bicie w przelocie
 int ChessBoard::do_ep_capture(int move)
 {
 	return do_capture((GET_TO(move) - movingPiece_->get_team() * 8) << 6);
 }
 
+// Metoda cofajaca podana ilosc ruchow zapisanych w historii
 void ChessBoard::undo_moves(int number, bool display , bool redoPossibleMoves)
 {
 	for (int i = 0; i < number; i++)
@@ -434,12 +446,14 @@ void ChessBoard::undo_moves(int number, bool display , bool redoPossibleMoves)
 	}
 }
 
+// Metoda cofajaca ruch figury
 void ChessBoard::undo_piece_move(int positionBeforeUndoing, int positionAfterUndoing)
 {
 	board_[positionBeforeUndoing]->undo_move(positionAfterUndoing);
 	update_board_positions(positionBeforeUndoing, positionAfterUndoing);
 }
 
+// Metoda cofajaca przechwycenie figury
 void ChessBoard::undo_capture(Piece * capturedPiecePtr)
 {
 	int pos = capturedPiecePtr->get_board_position();
@@ -448,6 +462,7 @@ void ChessBoard::undo_capture(Piece * capturedPiecePtr)
 	strengthBalance_ += capturedPiecePtr->get_strength();
 }
 
+// Metoda generujaca mozliwe ruchy
 std::vector<int> ChessBoard::generate_possible_moves(Team team, bool verifyCaptures, bool checkSafety)
 {
 	std::vector<int> ret;
@@ -485,6 +500,7 @@ std::vector<int> ChessBoard::generate_possible_moves(Team team, bool verifyCaptu
 	return ret;
 }
 
+// Metoda aktualizujaca mozliwe ruchy, uzywana po wykonaniu podanego ruchu
 void ChessBoard::update_possible_moves(Team movingTeam, int move)
 {
 	int a = 0, b = 0;
@@ -568,6 +584,7 @@ void ChessBoard::update_possible_moves(Team movingTeam, int move)
 	fill_possibleMovesByDestination_();
 }
 
+// Metoda zwracajaca mozliwe ruchy
 std::vector<int> ChessBoard::get_possible_moves(Team team, bool verifyCaptures, bool checkSafety, bool allowChecksafeMoves)
 {
 	std::vector<int> ret;
@@ -610,6 +627,9 @@ std::vector<int> ChessBoard::get_possible_moves(Team team, bool verifyCaptures, 
 	return ret;
 }
 
+// Metoda porzadkujaca ruchy wzgledem bicia
+// Ruchy bijace najbardziej wartosciowe figury ustawiane sa na poczatku
+// Ruchy ciche na koncu
 void ChessBoard::order_moves(std::vector<int> & moves)
 {
 	std::vector<int> ret, kingCaps, queenCaps, pawnCaps, otherCaps, otherMoves;
@@ -655,11 +675,14 @@ void ChessBoard::order_moves(std::vector<int> & moves)
 	moves = ret;
 }
 
+// Metoda zwracajaca wartosc planszy
 int ChessBoard::get_strength_balance()
 {
 	return strengthBalance_;
 }
 
+// Metoda zmieniajaca pozycje na planszy,
+// na pozycje na ekranie w pikselach
 void ChessBoard::board_pos_to_pix(int boardPos, GLfloat & xx, GLfloat	& yy)
 {
 	int rest = boardPos % 8;
@@ -667,6 +690,8 @@ void ChessBoard::board_pos_to_pix(int boardPos, GLfloat & xx, GLfloat	& yy)
 	yy = yPos_ + boardPixHeight_ * ((GLfloat)(boardPos - rest) + 4.0f) / 64;
 }
 
+// Metoda zwracajaca pole planszy, ktore jest najblizej
+// podanych wspolrzednych w pikselach
 int ChessBoard::closest_square(GLfloat xx, GLfloat yy)
 {
 	int w8 = static_cast<int>(boardPixWidth_) / 8,
@@ -677,6 +702,7 @@ int ChessBoard::closest_square(GLfloat xx, GLfloat yy)
 	return (x - (x % w8)) / w8 + 8 * (y - (y % h8)) / h8;
 }
 
+// Metoda sprawdzajaca, czy podane pole jest bezpieczne (nie bite)
 bool ChessBoard::is_square_safe(int square, Team teamCheckingSafety/*, const std::vector<int> & opponentMoves*/)
 {
 	//bool ret = true;
@@ -705,6 +731,7 @@ bool ChessBoard::is_square_safe(int square, Team teamCheckingSafety/*, const std
 	//return ret;
 }
 
+// Metoda usuwajaca ruchy niebezpieczne w podanej liscie ruchow krola
 void ChessBoard::verify_king_moves_safety(int kingPos, Team kingTeam, std::vector<int> & moves)
 {
 	std::vector<int> indicesToErase;
@@ -721,6 +748,7 @@ void ChessBoard::verify_king_moves_safety(int kingPos, Team kingTeam, std::vecto
 	board_[kingPos] = ptr;
 }
 
+// Metoda usuwajaca z podanej listy ruchow bicia wlasnej druzyny
 void ChessBoard::verify_piece_captures(Team pieceTeam, std::vector<int> & moves)
 {
 	std::vector<int> indicesToErase;
@@ -740,6 +768,7 @@ void ChessBoard::verify_piece_captures(Team pieceTeam, std::vector<int> & moves)
 	}
 }
 
+// Metoda sprawdzajaca, czy jest szach
 bool ChessBoard::evaluate_check(Team checkedTeam)
 {
 	std::vector<Piece*> * checkedTeamSet;
@@ -765,6 +794,7 @@ bool ChessBoard::evaluate_check(Team checkedTeam)
 	return !is_square_safe(position, checkedTeam/*, opponentMoves*/);
 }
 
+// Metoda sprawdzajaca, czy jest mat
 bool ChessBoard::evaluate_checkmate(Team checkedTeam, std::vector<int> *safeMovesContainer)
 {
 	std::vector<int> moves = get_possible_moves(checkedTeam, true, true, false);
@@ -797,6 +827,7 @@ bool ChessBoard::evaluate_checkmate(Team checkedTeam, std::vector<int> *safeMove
 
 }
 
+// Metoda zwracajaca true, jezeli krol podanej druzyny jest w szachu
 bool ChessBoard::is_king_checked(Team checkedTeam)
 {
 	if (checkedTeam == WHITE)
@@ -804,6 +835,7 @@ bool ChessBoard::is_king_checked(Team checkedTeam)
 	return whiteKingChecked_;
 }
 
+// Metoda wypisujaca plansze na standardowe wyjscie
 void ChessBoard::print_board()
 {
 	for (int i = board_.size() - 1; i > -1; i--)
@@ -820,6 +852,8 @@ void ChessBoard::print_board()
 }
 
 //////////////////////////// Events
+
+// Obsluzenie zdarzenia wcisniecia lewego przycisku myszy 
 void ChessBoard::mouse_left_pressed(GLfloat xx, GLfloat yy)
 {
 	static bool pieceSelected = false;

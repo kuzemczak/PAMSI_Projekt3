@@ -74,7 +74,6 @@ public:
 	std::vector<Piece*> board_;
 
 
-	void execute();
 	void enable();
 	void disable();
 
