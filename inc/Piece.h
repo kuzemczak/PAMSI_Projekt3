@@ -14,21 +14,21 @@
 #define ENCODE(from,to,capt,spec) ((from) | ((to) << 6) | ((capt) << 12) | (spec))	// encodes given values in an integer
 
 // Special bits:
-#define QUIET_MOVE (0 << 17)						// quiet move
-#define KING_CASTLE (1 << 17)						// king castle
-#define QUEEN_CASTLE (1 << 18)					// queen castle
-#define CAPTURE (1 << 19)								// capture
-#define EP_CAPTURE (1 << 20)						// ep-capture
-#define N_PROMO (1 << 21)							// knight-promotion
-#define B_PROMO (1 << 22)							// bishop-promotion
-#define R_PROMO (1 << 23)							// rook-promotion
-#define Q_PROMO (1 << 24)							// queen-promotion
-#define RAY_MOVE (1 << 25)						// ray move
-#define NEGATIVE_MOVE (1 << 26)				// negative (opposite direction)
-#define PROMOTION (1 << 27)					// general Pawn promotion
+#define QUIET_MOVE				(0 << 17)	// quiet move
+#define KING_CASTLE				(1 << 17)	// king castle
+#define QUEEN_CASTLE			(1 << 18)	// queen castle
+#define CAPTURE						(1 << 19)	// capture
+#define EP_CAPTURE				(1 << 20)	// ep-capture
+#define N_PROMO						(1 << 21)	// knight-promotion
+#define B_PROMO						(1 << 22)	// bishop-promotion
+#define R_PROMO						(1 << 23)	// rook-promotion
+#define Q_PROMO						(1 << 24)	// queen-promotion
+#define RAY_MOVE					(1 << 25)	// ray move
+#define NEGATIVE_MOVE			(1 << 26)	// negative (opposite direction)
+#define PROMOTION					(1 << 27)	// general Pawn promotion
 #define DOUBLE_PAWN_PUSH  (1 << 28)	// double pawn push
-#define PAWN_CAPTURE (1 << 29)				// pawn diagonal capturing move
-#define PAWN_PUSH (1 << 30)					// pawn push
+#define PAWN_CAPTURE			(1 << 29)	// pawn diagonal capturing move
+#define PAWN_PUSH					(1 << 30)	// pawn push
 // jeszcze jeden wolny bit
 
 
